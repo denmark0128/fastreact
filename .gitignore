@@ -1,0 +1,57 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.env
+
+# FastAPI / Alembic
+alembic/versions/*.pyc
+
+# Node / Bun
+node_modules/
+dist/
+.bun
+bun.lockb
+
+# Vite
+*.local
+vite.config.ts.timestamp*
+
+# TypeScript
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.development
+.env.production
+
+# Databases / local state
+*.sqlite3
+*.db
+
+# Secrets / credentials
+*.pem
+*.key
+*.p12
+*.crt
+*.secrets
+secrets/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
