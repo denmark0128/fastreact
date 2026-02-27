@@ -33,7 +33,7 @@ def test_biometric_ingest_and_payroll_attendance_integration(client: TestClient)
 
     ingest_response = client.post(
         '/api/v1/leave/attendance/punches/ingest',
-        headers={'x-biometric-api-key': 'local-biometric-key'},
+        headers={'x-biometric-api-key': 'test_bio_ingest_2f3a7c8d'},
         json={
             'punches': [
                 {
@@ -58,7 +58,7 @@ def test_biometric_ingest_and_payroll_attendance_integration(client: TestClient)
 
     duplicate_ingest_response = client.post(
         '/api/v1/leave/attendance/punches/ingest',
-        headers={'x-biometric-api-key': 'local-biometric-key'},
+        headers={'x-biometric-api-key': 'test_bio_ingest_2f3a7c8d'},
         json={
             'punches': [
                 {
