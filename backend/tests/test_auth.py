@@ -8,7 +8,7 @@ def test_login_success(client: TestClient):
         '/api/v1/auth/login',
         json={
             'email': 'admin@company.com',
-            'password': 'admin12345',
+            'password': 'admin987654321',
         },
     )
 
@@ -85,8 +85,8 @@ def test_change_password(client: TestClient):
         '/api/v1/auth/change-password',
         headers=headers,
         json={
-            'current_password': 'admin12345',
-            'new_password': 'admin12345-new',
+            'current_password': 'admin987654321',
+            'new_password': 'admin987654321-new',
         },
     )
     assert change_password_response.status_code == 200
@@ -95,7 +95,7 @@ def test_change_password(client: TestClient):
         '/api/v1/auth/login',
         json={
             'email': 'admin@company.com',
-            'password': 'admin12345-new',
+            'password': 'admin987654321-new',
         },
     )
     assert login_with_new_password_response.status_code == 200

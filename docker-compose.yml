@@ -8,21 +8,33 @@ services:
       APP_ENV: ${APP_ENV:-development}
       APP_PORT: 8000
       DATABASE_URL: ${DATABASE_URL:-sqlite:////app/data/dev.sqlite3}
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change-me-in-production}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY?JWT_SECRET_KEY is required}
       JWT_ALGORITHM: HS256
-      JWT_EXPIRE_MINUTES: 60
+      JWT_EXPIRE_MINUTES: ${JWT_EXPIRE_MINUTES:-60}
       DEFAULT_ADMIN_EMAIL: ${DEFAULT_ADMIN_EMAIL:-admin@company.com}
-      DEFAULT_ADMIN_PASSWORD: ${DEFAULT_ADMIN_PASSWORD:-admin12345}
+      DEFAULT_ADMIN_PASSWORD: ${DEFAULT_ADMIN_PASSWORD?DEFAULT_ADMIN_PASSWORD is required}
       DEFAULT_ADMIN_NAME: ${DEFAULT_ADMIN_NAME:-System Admin}
       DEFAULT_HR_EMAIL: ${DEFAULT_HR_EMAIL:-hr@company.com}
-      DEFAULT_HR_PASSWORD: ${DEFAULT_HR_PASSWORD:-hr12345}
+      DEFAULT_HR_PASSWORD: ${DEFAULT_HR_PASSWORD?DEFAULT_HR_PASSWORD is required}
       DEFAULT_HR_NAME: ${DEFAULT_HR_NAME:-HR Manager}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
-      BIOMETRIC_INGEST_API_KEY: ${BIOMETRIC_INGEST_API_KEY:-local-biometric-key}
+      BIOMETRIC_INGEST_API_KEY: ${BIOMETRIC_INGEST_API_KEY?BIOMETRIC_INGEST_API_KEY is required}
     volumes:
       - backend-data:/app/data
     expose:
       - "8000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/', timeout=5)",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
     restart: unless-stopped
 
   frontend:
@@ -35,7 +47,8 @@ services:
     ports:
       - "8080:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:
