@@ -37,7 +37,11 @@ class Settings(BaseSettings):
             raise ValueError("DEFAULT_ADMIN_PASSWORD and DEFAULT_HR_PASSWORD must be different in production")
         return self
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=(".env", "backend/.env"),
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
 
 settings = Settings()

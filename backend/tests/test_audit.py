@@ -46,7 +46,7 @@ def test_audit_logs_forbidden_for_employee_role(client: TestClient):
         json={
             'email': 'audit-employee@company.com',
             'full_name': 'Audit Employee',
-            'password': 'employee123',
+            'password': 'Employee1pass',
             'department': 'Engineering',
         },
     )
@@ -56,7 +56,7 @@ def test_audit_logs_forbidden_for_employee_role(client: TestClient):
         '/api/v1/auth/login',
         json={
             'email': 'audit-employee@company.com',
-            'password': 'employee123',
+            'password': 'Employee1pass',
         },
     )
     assert login_response.status_code == 200

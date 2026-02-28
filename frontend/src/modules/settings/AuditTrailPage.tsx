@@ -54,27 +54,27 @@ function AuditTrailPage() {
       <PageHeader title="Audit Trail" subtitle="Track key system changes and user actions" />
 
       {!canAccessAudit ? (
-        <Alert className="border-sky-200 bg-sky-50 text-sky-700">
+        <Alert className="border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-900 dark:bg-sky-950/50 dark:text-sky-200">
           This page is only available to Admin and HR Manager roles.
         </Alert>
       ) : null}
 
       {canAccessAudit ? (
-        <div className="space-y-4">
+        <div className="space-y-4 overflow-x-hidden">
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Filters</CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <CardContent className="grid grid-cols-1 gap-3 lg:grid-cols-[1fr_1fr_auto]">
               <div>
-                <p className="mb-1 text-xs text-slate-500">Action</p>
+                <p className="mb-1 text-xs text-muted-foreground">Action</p>
                 <Input value={actionFilter} onChange={(event) => setActionFilter(event.target.value)} placeholder="e.g. update_employee" />
               </div>
               <div>
-                <p className="mb-1 text-xs text-slate-500">Entity Type</p>
+                <p className="mb-1 text-xs text-muted-foreground">Entity Type</p>
                 <Input value={entityTypeFilter} onChange={(event) => setEntityTypeFilter(event.target.value)} placeholder="e.g. employee" />
               </div>
-              <div className="flex items-end justify-end">
+              <div className="flex items-end justify-start lg:justify-end">
                 <Button onClick={applyFilters}>Apply Filters</Button>
               </div>
             </CardContent>
@@ -84,23 +84,15 @@ function AuditTrailPage() {
             <CardHeader>
               <CardTitle className="text-base">Audit Logs</CardTitle>
             </CardHeader>
-            <CardContent>
-              {auditLogsQuery.isLoading ? <p className="text-sm text-slate-500">Loading audit logs...</p> : null}
-              {!auditLogsQuery.isLoading && logs.length === 0 ? <p className="text-sm text-slate-500">No audit records found.</p> : null}
+            <CardContent className="overflow-x-hidden">
+              {auditLogsQuery.isLoading ? <p className="text-sm text-muted-foreground">Loading audit logs...</p> : null}
+              {!auditLogsQuery.isLoading && logs.length === 0 ? <p className="text-sm text-muted-foreground">No audit records found.</p> : null}
 
               {logs.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full table-fixed border-collapse text-sm">
-                    <colgroup>
-                      <col className="w-40" />
-                      <col className="w-40" />
-                      <col className="w-36" />
-                      <col className="w-32" />
-                      <col className="w-44" />
-                      <col className="w-64" />
-                    </colgroup>
+                <div className="w-full overflow-x-auto">
+                  <table className="w-full border-collapse text-sm">
                     <thead>
-                      <tr className="border-b text-left text-slate-500">
+                      <tr className="border-b text-left text-muted-foreground">
                         <th className="py-2">Timestamp</th>
                         <th className="py-2">Actor</th>
                         <th className="py-2">Action</th>
@@ -118,7 +110,7 @@ function AuditTrailPage() {
                           <td className="truncate py-2 pr-2">{log.entity_type}</td>
                           <td className="truncate py-2 pr-2">{log.entity_id ?? '-'}</td>
                           <td className="py-2">
-                            <pre className="whitespace-pre-wrap break-words text-xs text-slate-700">
+                            <pre className="max-w-[24rem] whitespace-pre-wrap break-all text-xs text-foreground">
                               {log.details ? JSON.stringify(log.details) : '-'}
                             </pre>
                           </td>

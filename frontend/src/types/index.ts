@@ -60,6 +60,11 @@ export interface Employee {
   weekly_schedule: Record<string, string | null>
 }
 
+export interface EmployeeList {
+  items: Employee[]
+  total: number
+}
+
 export interface EmployeePayload {
   user_id?: number | null
   biometric_id?: string | null
@@ -256,4 +261,175 @@ export interface AuditLogList {
   total: number
   limit: number
   offset: number
+}
+
+// Leave & Attendance
+export type LeaveType =
+  | 'vacation'
+  | 'sick'
+  | 'personal'
+  | 'maternity'
+  | 'paternity'
+  | 'bereavement'
+  | 'unpaid'
+
+export type LeaveStatus = 'pending' | 'approved' | 'rejected' | 'cancelled'
+
+export interface LeaveRequestPayload {
+  leave_type: LeaveType
+  start_date: string
+  end_date: string
+  reason?: string | null
+  employee_id?: number
+}
+
+export interface LeaveReviewPayload {
+  status: LeaveStatus
+  review_note?: string | null
+}
+
+export interface LeaveRequest {
+  id: number
+  employee_id: number
+  employee_name?: string | null
+  leave_type: LeaveType
+  start_date: string
+  end_date: string
+  reason?: string | null
+  status: LeaveStatus
+  reviewer_id?: number | null
+  review_note?: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface LeaveRequestList {
+  items: LeaveRequest[]
+  total: number
+}
+
+// Recruitment
+export type JobStatus = 'open' | 'closed' | 'on_hold'
+
+export interface JobPostingPayload {
+  title: string
+  department: string
+  description?: string | null
+  requirements?: string | null
+}
+
+export interface JobPostingUpdatePayload {
+  title?: string
+  department?: string
+  description?: string | null
+  requirements?: string | null
+  status?: JobStatus | null
+}
+
+export interface JobPosting {
+  id: number
+  title: string
+  department: string
+  description?: string | null
+  requirements?: string | null
+  status: JobStatus
+  created_by: number
+  application_count: number
+  created_at: string
+  updated_at: string
+}
+
+export interface JobPostingList {
+  items: JobPosting[]
+  total: number
+}
+
+export type ApplicationStatus =
+  | 'new'
+  | 'screening'
+  | 'interview'
+  | 'offered'
+  | 'hired'
+  | 'rejected'
+  | 'withdrawn'
+
+export interface ApplicationPayload {
+  job_posting_id: number
+  applicant_name: string
+  applicant_email: string
+  phone?: string | null
+  resume_url?: string | null
+  cover_letter?: string | null
+}
+
+export interface ApplicationUpdatePayload {
+  status?: ApplicationStatus | null
+  notes?: string | null
+}
+
+export interface JobApplication {
+  id: number
+  job_posting_id: number
+  job_title?: string | null
+  applicant_name: string
+  applicant_email: string
+  phone?: string | null
+  resume_url?: string | null
+  cover_letter?: string | null
+  status: ApplicationStatus
+  notes?: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface ApplicationList {
+  items: JobApplication[]
+  total: number
+}
+
+// Performance
+export type ReviewCycle = 'quarterly' | 'semi_annual' | 'annual'
+export type ReviewStatus = 'draft' | 'submitted' | 'acknowledged'
+
+export interface PerformanceReviewPayload {
+  employee_id: number
+  review_period: string
+  cycle?: ReviewCycle
+  rating: number
+  strengths?: string | null
+  improvements?: string | null
+  goals?: string | null
+  comments?: string | null
+}
+
+export interface PerformanceReviewUpdatePayload {
+  rating?: number | null
+  strengths?: string | null
+  improvements?: string | null
+  goals?: string | null
+  comments?: string | null
+  status?: ReviewStatus | null
+}
+
+export interface PerformanceReview {
+  id: number
+  employee_id: number
+  employee_name?: string | null
+  reviewer_id: number
+  reviewer_name?: string | null
+  review_period: string
+  cycle: ReviewCycle
+  status: ReviewStatus
+  rating: number
+  strengths?: string | null
+  improvements?: string | null
+  goals?: string | null
+  comments?: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface PerformanceReviewList {
+  items: PerformanceReview[]
+  total: number
 }

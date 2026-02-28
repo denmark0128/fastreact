@@ -1,12 +1,8 @@
-import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react'
+import { createContext, useCallback, useContext, useMemo } from 'react'
 import type { ReactNode } from 'react'
 
-import { Card, CardContent } from '../components/ui/card'
-
-interface NotificationState {
-  id: number
-  message: string
-}
+import { Toaster } from '../components/ui/sonner'
+import { toast } from 'sonner'
 
 interface NotificationContextValue {
   showNotification: (message: string) => void
@@ -19,23 +15,8 @@ interface NotificationProviderProps {
 }
 
 export function NotificationProvider({ children }: NotificationProviderProps) {
-  const [notification, setNotification] = useState<NotificationState | null>(null)
-  const timeoutRef = useRef<number | null>(null)
-
   const showNotification = useCallback((message: string) => {
-    setNotification({
-      id: Date.now(),
-      message,
-    })
-
-    if (timeoutRef.current) {
-      window.clearTimeout(timeoutRef.current)
-    }
-
-    timeoutRef.current = window.setTimeout(() => {
-      setNotification(null)
-      timeoutRef.current = null
-    }, 2400)
+    toast.success(message)
   }, [])
 
   const value = useMemo(
@@ -48,13 +29,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
   return (
     <NotificationContext.Provider value={value}>
       {children}
-      {notification ? (
-        <div className="pointer-events-none fixed right-4 top-4 z-[60] w-full max-w-xs">
-          <Card className="border-emerald-200 bg-emerald-50 text-emerald-700">
-            <CardContent className="p-3 text-sm font-medium">{notification.message}</CardContent>
-          </Card>
-        </div>
-      ) : null}
+      <Toaster richColors closeButton position="top-right" />
     </NotificationContext.Provider>
   )
 }

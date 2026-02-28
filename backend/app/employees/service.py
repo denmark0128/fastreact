@@ -17,8 +17,30 @@ def create_employee(db: Session, payload: EmployeeCreate) -> Employee:
     return employee
 
 
-def list_employees(db: Session) -> list[Employee]:
-    return db.query(Employee).order_by(Employee.id.desc()).all()
+def list_employees(
+    db: Session,
+    *,
+    skip: int = 0,
+    limit: int = 50,
+    search: str | None = None,
+    department: str | None = None,
+    employment_status: str | None = None,
+) -> tuple[list[Employee], int]:
+    query = db.query(Employee)
+
+    if search:
+        term = f"%{search}%"
+        query = query.filter(
+            (Employee.profile_name.ilike(term)) | (Employee.employee_code.ilike(term))
+        )
+    if department:
+        query = query.filter(Employee.department == department)
+    if employment_status:
+        query = query.filter(Employee.employment_status == employment_status)
+
+    total = query.count()
+    items = query.order_by(Employee.id.desc()).offset(skip).limit(limit).all()
+    return items, total
 
 
 def get_employee(db: Session, employee_id: int) -> Employee:

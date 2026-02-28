@@ -39,7 +39,7 @@ function EmployeesPage() {
   const updateEmployeeMutation = useUpdateEmployee()
   const deleteEmployeeMutation = useDeleteEmployee()
 
-  const employees = employeesQuery.data?.data ?? []
+  const employees = employeesQuery.data?.data.items ?? []
   const departmentOptions = (departmentsQuery.data?.data ?? []).map((department) => department.name)
   const scheduleTemplate = useMemo(() => {
     const defaultShiftStart = adminSettingsQuery.data?.data?.default_shift_start || '09:00'
@@ -137,7 +137,7 @@ function EmployeesPage() {
       />
 
       <Card>
-        <CardContent>
+        <CardContent className="pt-6">
           <TableToolbar
             searchPlaceholder="Search employees..."
             searchQuery={searchQuery}
@@ -252,6 +252,7 @@ function EmployeesPage() {
               totalPages={totalPages}
               pageSize={pageSize}
               totalItems={filteredAndSortedEmployees.length}
+              onPageChange={setCurrentPage}
               onPrevious={() => setCurrentPage((current) => Math.max(1, current - 1))}
               onNext={() => setCurrentPage((current) => Math.min(totalPages, current + 1))}
             />

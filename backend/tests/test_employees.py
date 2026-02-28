@@ -28,7 +28,7 @@ def test_employee_crud_flow(client: TestClient):
 
     list_response = client.get('/api/v1/employees/', headers=headers)
     assert list_response.status_code == 200
-    assert len(list_response.json()['data']) == 1
+    assert len(list_response.json()['data']['items']) == 1
 
     get_response = client.get(f'/api/v1/employees/{employee_id}', headers=headers)
     assert get_response.status_code == 200
@@ -57,4 +57,4 @@ def test_employee_crud_flow(client: TestClient):
 
     final_list_response = client.get('/api/v1/employees/', headers=headers)
     assert final_list_response.status_code == 200
-    assert final_list_response.json()['data'] == []
+    assert final_list_response.json()['data']['items'] == []

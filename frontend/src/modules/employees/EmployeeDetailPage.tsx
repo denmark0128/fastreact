@@ -30,7 +30,7 @@ function EmployeeDetailPage() {
     if (Number.isNaN(id)) {
       return undefined
     }
-    return (employeesQuery.data?.data ?? []).find((item) => item.id === id)
+    return (employeesQuery.data?.data.items ?? []).find((item) => item.id === id)
   }, [employeeId, employeesQuery.data])
 
   if (employeesQuery.isLoading) {

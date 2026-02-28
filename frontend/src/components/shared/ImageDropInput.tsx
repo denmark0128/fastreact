@@ -71,10 +71,10 @@ function ImageDropInput({
 
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium">{label}</label>
+      <label className="text-sm font-medium text-slate-900 dark:text-slate-100">{label}</label>
 
       <div
-        className={`min-h-28 rounded-lg border border-dashed p-5 text-sm ${isDragging ? 'border-slate-900 bg-slate-50' : 'border-slate-300 bg-white'} ${disabled ? 'opacity-60' : ''}`}
+        className={`min-h-28 rounded-lg border border-dashed p-5 text-sm text-slate-700 dark:text-slate-300 ${isDragging ? 'border-slate-900 bg-slate-50 dark:border-slate-100 dark:bg-slate-800' : 'border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900'} ${disabled ? 'opacity-60' : ''}`}
         onDragOver={(event) => {
           event.preventDefault()
           if (!disabled) {

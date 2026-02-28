@@ -4,6 +4,7 @@ import PageHeader from '../../components/shared/PageHeader'
 import { Alert } from '../../components/ui/alert'
 import { Button } from '../../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
+import { DatePicker } from '../../components/ui/date-picker'
 import { Input } from '../../components/ui/input'
 import { useAuth } from '../../context/AuthContext'
 import { useEmployees } from '../employees/hooks'
@@ -49,7 +50,7 @@ function PayrollPage() {
   const summaryQuery = usePayrollSummary({ cutoff_start: cutoffStart, cutoff_end: cutoffEnd })
   const processPayrollMutation = useProcessPayroll()
 
-  const employees = employeesQuery.data?.data ?? []
+  const employees = employeesQuery.data?.data.items ?? []
   const records = recordsQuery.data?.data ?? []
   const summary = summaryQuery.data?.data
 
@@ -136,15 +137,15 @@ function PayrollPage() {
           <CardContent className="grid grid-cols-1 gap-3 md:grid-cols-4">
             <div>
               <p className="mb-1 text-xs text-slate-500">Cutoff Start</p>
-              <Input type="date" value={cutoffStart} onChange={(event) => setCutoffStart(event.target.value)} />
+              <DatePicker value={cutoffStart} onChange={setCutoffStart} />
             </div>
             <div>
               <p className="mb-1 text-xs text-slate-500">Cutoff End</p>
-              <Input type="date" value={cutoffEnd} onChange={(event) => setCutoffEnd(event.target.value)} />
+              <DatePicker value={cutoffEnd} onChange={setCutoffEnd} />
             </div>
             <div>
               <p className="mb-1 text-xs text-slate-500">Pay Date</p>
-              <Input type="date" value={payDate} onChange={(event) => setPayDate(event.target.value)} />
+              <DatePicker value={payDate} onChange={setPayDate} />
             </div>
             <div className="flex items-end justify-end">
               {canProcessPayroll ? (

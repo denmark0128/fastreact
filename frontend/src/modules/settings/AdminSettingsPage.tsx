@@ -6,14 +6,13 @@ import { z } from 'zod'
 import PageHeader from '../../components/shared/PageHeader'
 import { Alert } from '../../components/ui/alert'
 import { Button } from '../../components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 import { Input } from '../../components/ui/input'
-import { Label } from '../../components/ui/label'
 import { Select } from '../../components/ui/select'
 import { useAuth } from '../../context/AuthContext'
 import { useNotification } from '../../context/NotificationContext'
 import type { AdminSettingsUpdatePayload } from '../../types'
 import { useAdminSettings, useUpdateAdminSettings } from './hooks'
+import { CardTitle } from '@/components/ui/card'
 
 const adminSettingsSchema = z.object({
   late_grace_minutes: z.number().min(0),
@@ -139,46 +138,47 @@ function AdminSettingsPage() {
 
   return (
     <>
-      <PageHeader title="Admin Settings" subtitle="Policies, permissions, and defaults" />
+      <PageHeader
+        title="Admin Settings"
+        subtitle="Policies, permissions, and defaults"
+        extra={
+          canManageAdminSettings ? (
+            isAdminEditing ? (
+              <Button variant="outline" size="sm" onClick={handleCancelAdminEdit} disabled={updateAdminSettingsMutation.isPending}>
+                Cancel
+              </Button>
+            ) : (
+              <Button size="sm" onClick={() => setIsAdminEditing(true)}>
+                Edit
+              </Button>
+            )
+          ) : null
+        }
+      />
 
       {!canAccessAdminSettings ? (
-        <Alert className="border-sky-200 bg-sky-50 text-sky-700">
+        <Alert className="border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-900 dark:bg-sky-950/50 dark:text-sky-200">
           This page is only available to Admin and HR Manager roles.
         </Alert>
       ) : null}
 
       {canAccessAdminSettings ? (
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-3">
-            <CardTitle className="text-base">Admin Settings</CardTitle>
-            {canManageAdminSettings ? (
-              isAdminEditing ? (
-                <Button variant="outline" size="sm" onClick={handleCancelAdminEdit} disabled={updateAdminSettingsMutation.isPending}>
-                  Cancel
-                </Button>
-              ) : (
-                <Button size="sm" onClick={() => setIsAdminEditing(true)}>
-                  Edit
-                </Button>
-              )
-            ) : null}
-          </CardHeader>
-          <CardContent>
-            {!canManageAdminSettings ? (
-              <Alert className="mb-4 border-sky-200 bg-sky-50 text-sky-700">
-                Read-only access: only Admin can update policies, permissions, and defaults.
-              </Alert>
-            ) : null}
-            <form className="grid grid-cols-1 gap-4" onSubmit={handleAdminSubmit(onUpdateAdminSettings)}>
-              <div className="rounded-md border border-slate-200 p-3">
-                <p className="mb-3 text-sm font-semibold text-slate-900">Policies</p>
+        <div className="space-y-4">
+          {!canManageAdminSettings ? (
+            <Alert className="border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-900 dark:bg-sky-950/50 dark:text-sky-200">
+              Read-only access: only Admin can update policies, permissions, and defaults.
+            </Alert>
+          ) : null}
+          <form className="grid grid-cols-1 gap-4" onSubmit={handleAdminSubmit(onUpdateAdminSettings)}>
+              <div className="rounded-md border border-border p-6">
+                <CardTitle className="mb-3 text-base">Policies</CardTitle>
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   <Controller
                     name="late_grace_minutes"
                     control={adminControl}
                     render={({ field }) => (
                       <div className="space-y-1">
-                        <Label>Late Grace (minutes)</Label>
+                        <p className="mb-1 text-xs text-slate-500">Late Grace (minutes)</p>
                         <Input
                           type="number"
                           min="0"
@@ -194,7 +194,7 @@ function AdminSettingsPage() {
                     control={adminControl}
                     render={({ field }) => (
                       <div className="space-y-1">
-                        <Label>Minimum Overtime (minutes)</Label>
+                        <p className="mb-1 text-xs text-slate-500">Minimum Overtime (minutes)</p>
                         <Input
                           type="number"
                           min="0"
@@ -210,7 +210,7 @@ function AdminSettingsPage() {
                     control={adminControl}
                     render={({ field }) => (
                       <div className="space-y-1">
-                        <Label>Undertime Rounding (minutes)</Label>
+                        <p className="mb-1 text-xs text-slate-500">Undertime Rounding (minutes)</p>
                         <Input
                           type="number"
                           min="0"
@@ -226,7 +226,7 @@ function AdminSettingsPage() {
                     control={adminControl}
                     render={({ field }) => (
                       <div className="space-y-1">
-                        <Label>Payroll Cutoff</Label>
+                        <p className="mb-1 text-xs text-slate-500">Payroll Cutoff</p>
                         <Select value={field.value} onChange={(event) => field.onChange(event.target.value)} disabled={!canManageAdminSettings || !isAdminEditing}>
                           <option value="semi_monthly">Semi-monthly</option>
                           <option value="monthly">Monthly</option>
@@ -237,15 +237,15 @@ function AdminSettingsPage() {
                 </div>
               </div>
 
-              <div className="rounded-md border border-slate-200 p-3">
-                <p className="mb-3 text-sm font-semibold text-slate-900">Permissions</p>
+              <div className="rounded-md border border-border p-6">
+                <CardTitle className="mb-3 text-base">Permissions</CardTitle>
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   <Controller
                     name="employee_self_service_enabled"
                     control={adminControl}
                     render={({ field }) => (
                       <div className="space-y-1">
-                        <Label>Employee Self-Service</Label>
+                        <p className="mb-1 text-xs text-slate-500">Employee Self-Service</p>
                         <Select value={field.value} onChange={(event) => field.onChange(event.target.value)} disabled={!canManageAdminSettings || !isAdminEditing}>
                           <option value="true">Enabled</option>
                           <option value="false">Disabled</option>
@@ -258,7 +258,7 @@ function AdminSettingsPage() {
                     control={adminControl}
                     render={({ field }) => (
                       <div className="space-y-1">
-                        <Label>HR Can Process Payroll</Label>
+                        <p className="mb-1 text-xs text-slate-500">HR Can Process Payroll</p>
                         <Select value={field.value} onChange={(event) => field.onChange(event.target.value)} disabled={!canManageAdminSettings || !isAdminEditing}>
                           <option value="true">Allowed</option>
                           <option value="false">Not allowed</option>
@@ -271,7 +271,7 @@ function AdminSettingsPage() {
                     control={adminControl}
                     render={({ field }) => (
                       <div className="space-y-1">
-                        <Label>HR Can Manage Employees</Label>
+                        <p className="mb-1 text-xs text-slate-500">HR Can Manage Employees</p>
                         <Select value={field.value} onChange={(event) => field.onChange(event.target.value)} disabled={!canManageAdminSettings || !isAdminEditing}>
                           <option value="true">Allowed</option>
                           <option value="false">Not allowed</option>
@@ -284,7 +284,7 @@ function AdminSettingsPage() {
                     control={adminControl}
                     render={({ field }) => (
                       <div className="space-y-1">
-                        <Label>HR Can Manage Settings</Label>
+                        <p className="mb-1 text-xs text-slate-500">HR Can Manage Settings</p>
                         <Select value={field.value} onChange={(event) => field.onChange(event.target.value)} disabled={!canManageAdminSettings || !isAdminEditing}>
                           <option value="true">Allowed</option>
                           <option value="false">Not allowed</option>
@@ -295,15 +295,15 @@ function AdminSettingsPage() {
                 </div>
               </div>
 
-              <div className="rounded-md border border-slate-200 p-3">
-                <p className="mb-3 text-sm font-semibold text-slate-900">Defaults</p>
+              <div className="rounded-md border border-border p-6">
+                <CardTitle className="mb-3 text-base">Defaults</CardTitle>
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   <Controller
                     name="default_employee_role"
                     control={adminControl}
                     render={({ field }) => (
                       <div className="space-y-1">
-                        <Label>Default Role</Label>
+                        <p className="mb-1 text-xs text-slate-500">Default Role</p>
                         <Select value={field.value} onChange={(event) => field.onChange(event.target.value)} disabled={!canManageAdminSettings || !isAdminEditing}>
                           <option value="employee">Employee</option>
                           <option value="hr_manager">HR Manager</option>
@@ -316,7 +316,7 @@ function AdminSettingsPage() {
                     control={adminControl}
                     render={({ field }) => (
                       <div className="space-y-1">
-                        <Label>Default Rate Type</Label>
+                        <p className="mb-1 text-xs text-slate-500">Default Rate Type</p>
                         <Select value={field.value} onChange={(event) => field.onChange(event.target.value)} disabled={!canManageAdminSettings || !isAdminEditing}>
                           <option value="monthly">Monthly</option>
                           <option value="daily">Daily</option>
@@ -329,7 +329,7 @@ function AdminSettingsPage() {
                     control={adminControl}
                     render={({ field }) => (
                       <div className="space-y-1">
-                        <Label>Default Shift Start</Label>
+                        <p className="mb-1 text-xs text-slate-500">Default Shift Start</p>
                         <Input {...field} disabled={!canManageAdminSettings || !isAdminEditing} />
                       </div>
                     )}
@@ -339,7 +339,7 @@ function AdminSettingsPage() {
                     control={adminControl}
                     render={({ field }) => (
                       <div className="space-y-1">
-                        <Label>Default Shift End</Label>
+                        <p className="mb-1 text-xs text-slate-500">Default Shift End</p>
                         <Input {...field} disabled={!canManageAdminSettings || !isAdminEditing} />
                       </div>
                     )}
@@ -349,7 +349,7 @@ function AdminSettingsPage() {
                     control={adminControl}
                     render={({ field }) => (
                       <div className="space-y-1 md:col-span-2">
-                        <Label>Default Work Days</Label>
+                        <p className="mb-1 text-xs text-slate-500">Default Work Days</p>
                         <Select value={field.value} onChange={(event) => field.onChange(event.target.value)} disabled={!canManageAdminSettings || !isAdminEditing}>
                           <option value="monday-friday">Monday-Friday</option>
                           <option value="monday-saturday">Monday-Saturday</option>
@@ -365,9 +365,8 @@ function AdminSettingsPage() {
                   {updateAdminSettingsMutation.isPending ? 'Saving...' : 'Save Admin Settings'}
                 </Button>
               </div>
-            </form>
-          </CardContent>
-        </Card>
+          </form>
+        </div>
       ) : null}
     </>
   )

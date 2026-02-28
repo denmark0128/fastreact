@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app.audit.service import create_audit_log
@@ -46,10 +46,18 @@ def create_employee_endpoint(
 
 @router.get("/")
 def list_employees_endpoint(
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, ge=1, le=200),
+    search: str | None = None,
+    department: str | None = None,
+    employment_status: str | None = None,
     db: Session = Depends(get_db),
     _: User = Depends(require_roles(UserRole.admin, UserRole.hr_manager, UserRole.employee)),
 ):
-    employees = list_employees(db)
+    employees, total = list_employees(
+        db, skip=skip, limit=limit, search=search,
+        department=department, employment_status=employment_status,
+    )
     user_ids = [item.user_id for item in employees if item.user_id is not None]
     users_by_id = {
         item.id: item
@@ -63,7 +71,7 @@ def list_employees_endpoint(
         )
         for item in employees
     ]
-    return success_response("Employees fetched successfully", data)
+    return success_response("Employees fetched successfully", {"items": data, "total": total})
 
 
 @router.get("/{employee_id}")

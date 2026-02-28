@@ -141,259 +141,249 @@ function EmployeeForm({ initialEmployee, departmentOptions = [], scheduleTemplat
         </div>
 
         <TabsContent value="basic" className="mt-3">
-          <div className="rounded-md border border-slate-200 p-2.5">
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              <Controller
-                name="employee_code"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <div className="space-y-1">
-                    <Label>Employee Code</Label>
-                    <Input {...field} disabled={Boolean(initialEmployee)} />
-                    {fieldState.error ? <p className="text-xs text-red-600">{fieldState.error.message}</p> : null}
-                  </div>
-                )}
-              />
-              <Controller
-                name="biometric_id"
-                control={control}
-                render={({ field }) => (
-                  <div className="space-y-1">
-                    <Label>Biometric ID</Label>
-                    <Input {...field} placeholder="e.g. FP-10023" />
-                  </div>
-                )}
-              />
-              <Controller
-                name="profile_name"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <div className="space-y-1">
-                    <Label>Profile Name</Label>
-                    <Input {...field} />
-                    {fieldState.error ? <p className="text-xs text-red-600">{fieldState.error.message}</p> : null}
-                  </div>
-                )}
-              />
-            </div>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <Controller
+              name="employee_code"
+              control={control}
+              render={({ field, fieldState }) => (
+                <div className="space-y-1">
+                  <Label>Employee Code</Label>
+                  <Input {...field} disabled={Boolean(initialEmployee)} />
+                  {fieldState.error ? <p className="text-xs text-red-600">{fieldState.error.message}</p> : null}
+                </div>
+              )}
+            />
+            <Controller
+              name="biometric_id"
+              control={control}
+              render={({ field }) => (
+                <div className="space-y-1">
+                  <Label>Biometric ID</Label>
+                  <Input {...field} placeholder="e.g. FP-10023" />
+                </div>
+              )}
+            />
+            <Controller
+              name="profile_name"
+              control={control}
+              render={({ field, fieldState }) => (
+                <div className="space-y-1">
+                  <Label>Profile Name</Label>
+                  <Input {...field} />
+                  {fieldState.error ? <p className="text-xs text-red-600">{fieldState.error.message}</p> : null}
+                </div>
+              )}
+            />
           </div>
         </TabsContent>
 
         <TabsContent value="personal" className="mt-3">
-          <div className="rounded-md border border-slate-200 p-2.5">
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              <Controller
-                name="birth_date"
-                control={control}
-                render={({ field }) => (
-                  <div className="space-y-1">
-                    <Label>Birth Date</Label>
-                    <Popover open={birthDateOpen} onOpenChange={setBirthDateOpen}>
-                      <PopoverTrigger asChild>
-                        <Button type="button" variant="outline" className={cn('w-full justify-start font-normal')}>
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {field.value ? parseISO(field.value).toLocaleDateString() : 'Select date'}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto overflow-hidden p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value ? parseISO(field.value) : undefined}
-                          defaultMonth={field.value ? parseISO(field.value) : undefined}
-                          captionLayout="dropdown"
-                          onSelect={(date) => {
-                            field.onChange(date ? format(date, 'yyyy-MM-dd') : '')
-                            setBirthDateOpen(false)
-                          }}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                )}
-              />
-              <Controller
-                name="civil_status"
-                control={control}
-                render={({ field }) => (
-                  <div className="space-y-1">
-                    <Label>Civil Status</Label>
-                    <Select value={field.value ?? ''} onChange={(event) => field.onChange(event.target.value)}>
-                      <option value="">Select status</option>
-                      <option value="single">Single</option>
-                      <option value="married">Married</option>
-                      <option value="separated">Separated</option>
-                      <option value="widowed">Widowed</option>
-                    </Select>
-                  </div>
-                )}
-              />
-              <Controller
-                name="emergency_contact_name"
-                control={control}
-                render={({ field }) => (
-                  <div className="space-y-1">
-                    <Label>Emergency Contact Name</Label>
-                    <Input {...field} />
-                  </div>
-                )}
-              />
-              <Controller
-                name="emergency_contact_number"
-                control={control}
-                render={({ field }) => (
-                  <div className="space-y-1">
-                    <Label>Emergency Contact Number</Label>
-                    <Input {...field} />
-                  </div>
-                )}
-              />
-            </div>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <Controller
+              name="birth_date"
+              control={control}
+              render={({ field }) => (
+                <div className="space-y-1">
+                  <Label>Birth Date</Label>
+                  <Popover open={birthDateOpen} onOpenChange={setBirthDateOpen}>
+                    <PopoverTrigger asChild>
+                      <Button type="button" variant="outline" className={cn('w-full justify-start font-normal')}>
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {field.value ? parseISO(field.value).toLocaleDateString() : 'Select date'}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value ? parseISO(field.value) : undefined}
+                        defaultMonth={field.value ? parseISO(field.value) : undefined}
+                        captionLayout="dropdown"
+                        onSelect={(date) => {
+                          field.onChange(date ? format(date, 'yyyy-MM-dd') : '')
+                          setBirthDateOpen(false)
+                        }}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              )}
+            />
+            <Controller
+              name="civil_status"
+              control={control}
+              render={({ field }) => (
+                <div className="space-y-1">
+                  <Label>Civil Status</Label>
+                  <Select value={field.value ?? ''} onChange={(event) => field.onChange(event.target.value)}>
+                    <option value="">Select status</option>
+                    <option value="single">Single</option>
+                    <option value="married">Married</option>
+                    <option value="separated">Separated</option>
+                    <option value="widowed">Widowed</option>
+                  </Select>
+                </div>
+              )}
+            />
+            <Controller
+              name="emergency_contact_name"
+              control={control}
+              render={({ field }) => (
+                <div className="space-y-1">
+                  <Label>Emergency Contact Name</Label>
+                  <Input {...field} />
+                </div>
+              )}
+            />
+            <Controller
+              name="emergency_contact_number"
+              control={control}
+              render={({ field }) => (
+                <div className="space-y-1">
+                  <Label>Emergency Contact Number</Label>
+                  <Input {...field} />
+                </div>
+              )}
+            />
           </div>
         </TabsContent>
 
         <TabsContent value="employment" className="mt-3">
-          <div className="rounded-md border border-slate-200 p-2.5">
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              <Controller
-                name="department"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <div className="space-y-1">
-                    <Label>Department</Label>
-                    <Select value={field.value} onChange={(event) => field.onChange(event.target.value)}>
-                      <option value="">Select department</option>
-                      {departmentOptions.map((departmentName) => (
-                        <option key={departmentName} value={departmentName}>
-                          {departmentName}
-                        </option>
-                      ))}
-                    </Select>
-                    {fieldState.error ? <p className="text-xs text-red-600">{fieldState.error.message}</p> : null}
-                  </div>
-                )}
-              />
-              <Controller
-                name="position"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <div className="space-y-1">
-                    <Label>Position</Label>
-                    <Input {...field} />
-                    {fieldState.error ? <p className="text-xs text-red-600">{fieldState.error.message}</p> : null}
-                  </div>
-                )}
-              />
-              <Controller
-                name="employment_status"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <div className="space-y-1">
-                    <Label>Employment Status</Label>
-                    <Select value={field.value} onChange={(event) => field.onChange(event.target.value)}>
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
-                      <option value="probation">Probation</option>
-                      <option value="sick_leave">Sick Leave</option>
-                      <option value="vacation_leave">Vacation Leave</option>
-                    </Select>
-                    {fieldState.error ? <p className="text-xs text-red-600">{fieldState.error.message}</p> : null}
-                  </div>
-                )}
-              />
-              <Controller
-                name="employment_type"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <div className="space-y-1">
-                    <Label>Employment Type</Label>
-                    <Select value={field.value} onChange={(event) => field.onChange(event.target.value)}>
-                      <option value="regular">Regular</option>
-                      <option value="trainee">Trainee</option>
-                      <option value="intern">Intern</option>
-                      <option value="probationary">Probationary</option>
-                      <option value="contractual">Contractual</option>
-                      <option value="part_time">Part Time</option>
-                    </Select>
-                    {fieldState.error ? <p className="text-xs text-red-600">{fieldState.error.message}</p> : null}
-                  </div>
-                )}
-              />
-            </div>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <Controller
+              name="department"
+              control={control}
+              render={({ field, fieldState }) => (
+                <div className="space-y-1">
+                  <Label>Department</Label>
+                  <Select value={field.value} onChange={(event) => field.onChange(event.target.value)}>
+                    <option value="">Select department</option>
+                    {departmentOptions.map((departmentName) => (
+                      <option key={departmentName} value={departmentName}>
+                        {departmentName}
+                      </option>
+                    ))}
+                  </Select>
+                  {fieldState.error ? <p className="text-xs text-red-600">{fieldState.error.message}</p> : null}
+                </div>
+              )}
+            />
+            <Controller
+              name="position"
+              control={control}
+              render={({ field, fieldState }) => (
+                <div className="space-y-1">
+                  <Label>Position</Label>
+                  <Input {...field} />
+                  {fieldState.error ? <p className="text-xs text-red-600">{fieldState.error.message}</p> : null}
+                </div>
+              )}
+            />
+            <Controller
+              name="employment_status"
+              control={control}
+              render={({ field, fieldState }) => (
+                <div className="space-y-1">
+                  <Label>Employment Status</Label>
+                  <Select value={field.value} onChange={(event) => field.onChange(event.target.value)}>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="probation">Probation</option>
+                    <option value="sick_leave">Sick Leave</option>
+                    <option value="vacation_leave">Vacation Leave</option>
+                  </Select>
+                  {fieldState.error ? <p className="text-xs text-red-600">{fieldState.error.message}</p> : null}
+                </div>
+              )}
+            />
+            <Controller
+              name="employment_type"
+              control={control}
+              render={({ field, fieldState }) => (
+                <div className="space-y-1">
+                  <Label>Employment Type</Label>
+                  <Select value={field.value} onChange={(event) => field.onChange(event.target.value)}>
+                    <option value="regular">Regular</option>
+                    <option value="trainee">Trainee</option>
+                    <option value="intern">Intern</option>
+                    <option value="probationary">Probationary</option>
+                    <option value="contractual">Contractual</option>
+                    <option value="part_time">Part Time</option>
+                  </Select>
+                  {fieldState.error ? <p className="text-xs text-red-600">{fieldState.error.message}</p> : null}
+                </div>
+              )}
+            />
           </div>
         </TabsContent>
 
         <TabsContent value="compensation" className="mt-3">
-          <div className="rounded-md border border-slate-200 p-2.5">
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              <Controller
-                name="rate_type"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <div className="space-y-1">
-                    <Label>Rate Type</Label>
-                    <Select value={field.value} onChange={(event) => field.onChange(event.target.value)}>
-                      <option value="daily">Daily</option>
-                      <option value="monthly">Monthly</option>
-                    </Select>
-                    {fieldState.error ? <p className="text-xs text-red-600">{fieldState.error.message}</p> : null}
-                  </div>
-                )}
-              />
-              <Controller
-                name="rate_amount"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <div className="space-y-1">
-                    <Label>Rate Amount</Label>
-                    <Input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={field.value}
-                      onChange={(event) => field.onChange(Number(event.target.value))}
-                    />
-                    {fieldState.error ? <p className="text-xs text-red-600">{fieldState.error.message}</p> : null}
-                  </div>
-                )}
-              />
-            </div>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <Controller
+              name="rate_type"
+              control={control}
+              render={({ field, fieldState }) => (
+                <div className="space-y-1">
+                  <Label>Rate Type</Label>
+                  <Select value={field.value} onChange={(event) => field.onChange(event.target.value)}>
+                    <option value="daily">Daily</option>
+                    <option value="monthly">Monthly</option>
+                  </Select>
+                  {fieldState.error ? <p className="text-xs text-red-600">{fieldState.error.message}</p> : null}
+                </div>
+              )}
+            />
+            <Controller
+              name="rate_amount"
+              control={control}
+              render={({ field, fieldState }) => (
+                <div className="space-y-1">
+                  <Label>Rate Amount</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={field.value}
+                    onChange={(event) => field.onChange(Number(event.target.value))}
+                  />
+                  {fieldState.error ? <p className="text-xs text-red-600">{fieldState.error.message}</p> : null}
+                </div>
+              )}
+            />
           </div>
         </TabsContent>
 
         <TabsContent value="schedule" className="mt-3">
-          <div className="rounded-md border border-slate-200 p-2.5">
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              {scheduleDays.map((day) => (
-                <Controller
-                  key={day.key}
-                  name={`weekly_schedule.${day.key}`}
-                  control={control}
-                  render={({ field }) => (
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <Label>{day.label}</Label>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setValue(`weekly_schedule.${day.key}`, field.value ? '' : effectiveDefaultSchedule[day.key])
-                          }}
-                        >
-                          {field.value ? 'Set Off' : 'Set Default'}
-                        </Button>
-                      </div>
-                      <Input
-                        value={field.value ?? ''}
-                        onChange={field.onChange}
-                        placeholder={effectiveDefaultSchedule[day.key] ? `Default: ${effectiveDefaultSchedule[day.key]}` : 'Default: Off'}
-                      />
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            {scheduleDays.map((day) => (
+              <Controller
+                key={day.key}
+                name={`weekly_schedule.${day.key}`}
+                control={control}
+                render={({ field }) => (
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <Label>{day.label}</Label>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setValue(`weekly_schedule.${day.key}`, field.value ? '' : effectiveDefaultSchedule[day.key])
+                        }}
+                      >
+                        {field.value ? 'Set Off' : 'Set Default'}
+                      </Button>
                     </div>
-                  )}
-                />
-              ))}
-            </div>
+                    <Input
+                      value={field.value ?? ''}
+                      onChange={field.onChange}
+                      placeholder={effectiveDefaultSchedule[day.key] ? `Default: ${effectiveDefaultSchedule[day.key]}` : 'Default: Off'}
+                    />
+                  </div>
+                )}
+              />
+            ))}
           </div>
         </TabsContent>
       </Tabs>

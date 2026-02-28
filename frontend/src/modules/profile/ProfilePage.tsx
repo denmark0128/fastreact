@@ -173,36 +173,36 @@ function ProfilePage() {
                   <img
                     src={profilePictureUrl}
                     alt="Profile"
-                    className="h-24 w-24 rounded-full border border-slate-200 object-cover"
+                    className="h-24 w-24 rounded-full border border-border object-cover"
                   />
                 </button>
               ) : (
-                <div className="flex h-24 w-24 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-xl font-semibold text-slate-700">
+                <div className="flex h-24 w-24 items-center justify-center rounded-full border border-border bg-muted text-xl font-semibold text-foreground">
                   {profileInitial}
                 </div>
               )}
             </div>
 
             <div className="space-y-2 text-sm">
-              <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
-                <p className="text-xs uppercase tracking-wide text-slate-500">Name</p>
-                <p className="font-medium text-slate-900">{fullNameValue || '-'}</p>
+              <div className="rounded-md border border-border bg-muted px-3 py-2">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Name</p>
+                <p className="font-medium text-foreground">{fullNameValue || '-'}</p>
               </div>
-              <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
-                <p className="text-xs uppercase tracking-wide text-slate-500">Email</p>
-                <p className="font-medium text-slate-900">{myProfileQuery.data?.data?.email ?? '-'}</p>
+              <div className="rounded-md border border-border bg-muted px-3 py-2">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Email</p>
+                <p className="font-medium text-foreground">{myProfileQuery.data?.data?.email ?? '-'}</p>
               </div>
-              <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
-                <p className="text-xs uppercase tracking-wide text-slate-500">Role</p>
-                <p className="font-medium capitalize text-slate-900">{myProfileQuery.data?.data?.role?.replace('_', ' ') ?? '-'}</p>
+              <div className="rounded-md border border-border bg-muted px-3 py-2">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Role</p>
+                <p className="font-medium capitalize text-foreground">{myProfileQuery.data?.data?.role?.replace('_', ' ') ?? '-'}</p>
               </div>
-              <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
-                <p className="text-xs uppercase tracking-wide text-slate-500">Contact Number</p>
-                <p className="font-medium text-slate-900">{contactNumberValue || '-'}</p>
+              <div className="rounded-md border border-border bg-muted px-3 py-2">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Contact Number</p>
+                <p className="font-medium text-foreground">{contactNumberValue || '-'}</p>
               </div>
-              <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
-                <p className="text-xs uppercase tracking-wide text-slate-500">Address</p>
-                <p className="font-medium text-slate-900">{fullAddress || '-'}</p>
+              <div className="rounded-md border border-border bg-muted px-3 py-2">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Address</p>
+                <p className="font-medium text-foreground">{fullAddress || '-'}</p>
               </div>
             </div>
           </CardContent>

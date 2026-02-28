@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class DepartmentCreateRequest(BaseModel):
@@ -19,8 +19,7 @@ class DepartmentResponse(BaseModel):
 	description: str | None = None
 	head_employee_id: int | None = None
 
-	class Config:
-		from_attributes = True
+	model_config = ConfigDict(from_attributes=True)
 
 
 class CompanyProfileUpdateRequest(BaseModel):
@@ -47,8 +46,7 @@ class CompanyProfileResponse(BaseModel):
 	region: str | None = None
 	logo_url: str | None = None
 
-	class Config:
-		from_attributes = True
+	model_config = ConfigDict(from_attributes=True)
 
 
 class AdminSettingsUpdateRequest(BaseModel):

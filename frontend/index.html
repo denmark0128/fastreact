@@ -4,6 +4,23 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      ;(() => {
+        try {
+          const storageKey = 'theme-preference'
+          const savedTheme = localStorage.getItem(storageKey)
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const shouldUseDark = savedTheme ? savedTheme === 'dark' : prefersDark
+          const root = document.documentElement
+          root.classList.toggle('dark', shouldUseDark)
+          root.style.colorScheme = shouldUseDark ? 'dark' : 'light'
+        } catch {
+          document.documentElement.classList.remove('dark')
+          document.documentElement.style.colorScheme = 'light'
+        }
+      })()
+    </script>
     <title>frontend</title>
   </head>
   <body>

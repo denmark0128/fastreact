@@ -127,3 +127,34 @@
 - Updated status display UX consistency:
 	- Dashboard unavailable list now shows specific leave/status reason (`SL`/`VL`/etc.) instead of generic `Unavailable`.
 	- Employee Details status badge now shows human-readable labels (e.g., `Sick Leave`) instead of raw underscored values (`SICK_LEAVE`).
+
+## Recent Updates (2026-02-28)
+- Initialized official shadcn CLI setup for frontend (`components.json`, aliases, theme tokens) to support `bunx --bun shadcn@latest add ...` workflow.
+- Added and integrated shadcn components: `sonner`, `sidebar`, `dialog`, `avatar`, `collapsible`, `textarea`, and date-picker support pieces.
+- Replaced custom notification card with shadcn Sonner toast integration while preserving existing `showNotification` context API.
+- Replaced custom sidebar layout with shadcn sidebar primitives and added a dedicated `AppSidebar` composition.
+- Restored all expected navigation entries in sidebar:
+	- Departments
+	- Admin Settings
+	- Audit Trail (role-aware for admin/hr)
+- Fixed sidebar collapsed-mode text clipping by switching to icon-first rows and controlled label hiding.
+- Added smooth label transition on sidebar collapse/expand (opacity/transform/width transition) without reintroducing clipping.
+- Replaced custom modal internals with shadcn Dialog primitives while preserving existing `Modal` component API usage across pages.
+- Standardized select/dropdown behavior to shadcn/radix-based implementation compatible with existing app form usage.
+- Fixed layout stability issues:
+	- removed `scrollbar-gutter: stable` reservation mismatch
+	- enforced consistent vertical scrollbar lane with `overflow-y: scroll`
+	- removed sidebar width tween transitions that caused skipped text during resize.
+- Validation: frontend build passes (`bun run build`).
+- Tuned sidebar interaction/animation UX:
+	- increased collapse/expand timing for smoother transitions
+	- removed fade-in/out behavior for sidebar labels/icons per preference
+	- fixed temporary wrapped label glitch (`Main Navigation`) during expand by enforcing no-wrap label transitions.
+- Fixed collapsed-sidebar navigation behavior so primary menu items remain clickable in icon-only state.
+- Performed dark-mode consistency fixes across layout and tokens:
+	- switched app shell/header/background usage to theme tokens (`bg-background`, `text-foreground`, `border-border`)
+	- aligned sidebar border/accent tokens to match main dark palette
+	- added global dark-mode compatibility overrides for legacy `slate-*`/`bg-white` utility classes to prevent white cards and mismatched text in dark mode.
+- Updated profile summary cards to theme tokens (`bg-muted`, `border-border`, `text-foreground`, `text-muted-foreground`) to remove white tiles in dark mode.
+- Updated dark primary token so default buttons are no longer white blocks in dark mode.
+- Validation: frontend build passes after each theming/UX update (`bun run build`).
