@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.employees.models import EmploymentType, RateType
 
@@ -62,5 +62,4 @@ class EmployeeResponse(EmployeeBase):
     city: str | None = None
     region: str | None = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

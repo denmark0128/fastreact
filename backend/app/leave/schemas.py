@@ -1,7 +1,48 @@
 from datetime import date, datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
+from app.leave.models import LeaveStatus, LeaveType
+
+
+# ── Leave Requests ──
+
+class LeaveRequestCreate(BaseModel):
+	leave_type: LeaveType
+	start_date: str
+	end_date: str
+	reason: str | None = None
+	employee_id: int | None = None
+
+
+class LeaveRequestReview(BaseModel):
+	status: LeaveStatus
+	review_note: str | None = None
+
+
+class LeaveRequestResponse(BaseModel):
+	id: int
+	employee_id: int
+	employee_name: str | None = None
+	leave_type: LeaveType
+	start_date: str
+	end_date: str
+	reason: str | None = None
+	status: LeaveStatus
+	reviewer_id: int | None = None
+	review_note: str | None = None
+	created_at: datetime
+	updated_at: datetime
+
+	model_config = ConfigDict(from_attributes=True)
+
+
+class LeaveRequestListResponse(BaseModel):
+	items: list[LeaveRequestResponse]
+	total: int
+
+
+# ── Attendance ──
 
 class AttendancePunchIngestItem(BaseModel):
 	device_id: str

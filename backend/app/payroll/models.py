@@ -1,9 +1,13 @@
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 
 from sqlalchemy import Date, DateTime, ForeignKey, Integer, Numeric, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
+
+
+def _utcnow() -> datetime:
+	return datetime.now(UTC)
 
 
 class PayrollRecord(Base):
@@ -35,4 +39,4 @@ class PayrollRecord(Base):
 	net_pay: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False, default=0)
 
 	notes: Mapped[str | None] = mapped_column(String(500), nullable=True)
-	created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+	created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=_utcnow)

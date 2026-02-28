@@ -51,7 +51,7 @@ function DepartmentsPage() {
   const deleteDepartmentMutation = useDeleteDepartment()
 
   const departments = useMemo(() => departmentsQuery.data?.data ?? [], [departmentsQuery.data])
-  const employeeOptions = useMemo(() => employeesQuery.data?.data ?? [], [employeesQuery.data])
+  const employeeOptions = useMemo(() => employeesQuery.data?.data.items ?? [], [employeesQuery.data])
 
   const {
     searchQuery,
@@ -144,7 +144,7 @@ function DepartmentsPage() {
       />
 
       <Card>
-        <CardContent>
+        <CardContent className="pt-6">
           {!canManageDepartments ? (
             <Alert className="mb-4 border-sky-200 bg-sky-50 text-sky-700">
               Read-only access: only Admin and HR Manager can create or delete departments.
@@ -247,6 +247,7 @@ function DepartmentsPage() {
               totalPages={totalPages}
               pageSize={pageSize}
               totalItems={filteredAndSortedDepartments.length}
+              onPageChange={setCurrentPage}
               onPrevious={() => setCurrentPage((current) => Math.max(1, current - 1))}
               onNext={() => setCurrentPage((current) => Math.min(totalPages, current + 1))}
             />

@@ -14,8 +14,7 @@ from app.utils.responses import success_response
 router = APIRouter()
 
 
-def _record_to_response(db: Session, record) -> dict:
-    employee = db.query(Employee).filter(Employee.id == record.employee_id).first()
+def _record_to_dict(record, employee: Employee | None = None) -> dict:
     return {
         "id": record.id,
         "employee_id": record.employee_id,
@@ -39,6 +38,17 @@ def _record_to_response(db: Session, record) -> dict:
         "net_pay": float(record.net_pay),
         "notes": record.notes,
     }
+
+
+def _batch_records_to_response(db: Session, records: list) -> list[dict]:
+    """Batch-load employees for all records to avoid N+1 queries."""
+    employee_ids = list({r.employee_id for r in records})
+    employees_by_id: dict[int, Employee] = {}
+    if employee_ids:
+        employees_by_id = {
+            e.id: e for e in db.query(Employee).filter(Employee.id.in_(employee_ids)).all()
+        }
+    return [_record_to_dict(r, employees_by_id.get(r.employee_id)) for r in records]
 
 
 def _resolve_employee_filter_for_current_user(current_user: User, db: Session) -> int | None:
@@ -72,7 +82,7 @@ def process_payroll_endpoint(
             "record_count": len(records),
         },
     )
-    data = [_record_to_response(db, record) for record in records]
+    data = _batch_records_to_response(db, records)
     return success_response("Payroll processed successfully", data)
 
 
@@ -98,7 +108,7 @@ def list_payroll_records_endpoint(
         cutoff_end=cutoff_end,
         employee_id=resolved_employee_filter,
     )
-    data = [_record_to_response(db, record) for record in records]
+    data = _batch_records_to_response(db, records)
     return success_response("Payroll records fetched successfully", data)
 
 

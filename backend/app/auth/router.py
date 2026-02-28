@@ -5,6 +5,7 @@ from app.audit.service import create_audit_log
 from app.auth.models import User, UserRole
 from app.auth.schemas import AuthTokenPayload, AuthUserResponse, ChangePasswordRequest, LoginRequest, RegisterRequest, SignupRequest, UpdateProfileRequest
 from app.auth.service import authenticate_user, change_user_password, create_access_token, create_signup_user, create_user, update_user_profile
+from app.config import settings
 from app.dependencies import get_current_user, get_db, require_roles
 from app.utils.responses import success_response
 
@@ -64,12 +65,13 @@ def login(payload: LoginRequest, response: Response, db: Session = Depends(get_d
         actor=user,
     )
 
+    is_production = settings.app_env.lower() == "production"
     response.set_cookie(
         key="access_token",
         value=access_token,
         httponly=True,
-        secure=False,
-        samesite="lax",
+        secure=is_production,
+        samesite="strict" if is_production else "lax",
     )
 
     token_payload = AuthTokenPayload(

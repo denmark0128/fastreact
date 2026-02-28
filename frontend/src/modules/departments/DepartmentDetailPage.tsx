@@ -26,7 +26,7 @@ function DepartmentDetailPage() {
     if (!department) {
       return []
     }
-    return (employeesQuery.data?.data ?? []).filter((item) => item.department === department.name)
+    return (employeesQuery.data?.data.items ?? []).filter((item) => item.department === department.name)
   }, [department, employeesQuery.data])
 
   if (departmentsQuery.isLoading || employeesQuery.isLoading) {

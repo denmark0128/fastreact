@@ -1,8 +1,8 @@
 import axiosInstance from '../../api/axios'
-import type { ApiResponse, Employee, EmployeePayload, EmployeeUpdatePayload } from '../../types'
+import type { ApiResponse, Employee, EmployeeList, EmployeePayload, EmployeeUpdatePayload } from '../../types'
 
-export async function getEmployees(): Promise<ApiResponse<Employee[]>> {
-  const response = await axiosInstance.get<ApiResponse<Employee[]>>('/employees/')
+export async function getEmployees(): Promise<ApiResponse<EmployeeList>> {
+  const response = await axiosInstance.get<ApiResponse<EmployeeList>>('/employees/')
   return response.data
 }
 

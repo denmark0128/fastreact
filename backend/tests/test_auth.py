@@ -33,7 +33,7 @@ def test_register_user_as_admin(client: TestClient):
         json={
             'email': 'employee1@company.com',
             'full_name': 'Employee One',
-            'password': 'employee123',
+            'password': 'Employee1pass',
             'role': 'employee',
         },
     )
@@ -50,7 +50,7 @@ def test_signup_creates_employee_with_department(client: TestClient):
         json={
             'email': 'selfsignup@company.com',
             'full_name': 'Self Signup',
-            'password': 'signup123',
+            'password': 'Signup1pass',
             'department': 'Engineering',
         },
     )
@@ -60,7 +60,7 @@ def test_signup_creates_employee_with_department(client: TestClient):
         '/api/v1/auth/login',
         json={
             'email': 'selfsignup@company.com',
-            'password': 'signup123',
+            'password': 'Signup1pass',
         },
     )
     assert login_response.status_code == 200
@@ -71,7 +71,7 @@ def test_signup_creates_employee_with_department(client: TestClient):
         headers={'Authorization': f'Bearer {token}'},
     )
     assert employees_response.status_code == 200
-    employees = employees_response.json()['data']
+    employees = employees_response.json()['data']['items']
 
     assert len(employees) == 1
     assert employees[0]['profile_name'] == 'Self Signup'
@@ -86,7 +86,7 @@ def test_change_password(client: TestClient):
         headers=headers,
         json={
             'current_password': 'admin987654321',
-            'new_password': 'admin987654321-new',
+            'new_password': 'Admin987654321new',
         },
     )
     assert change_password_response.status_code == 200
@@ -95,7 +95,7 @@ def test_change_password(client: TestClient):
         '/api/v1/auth/login',
         json={
             'email': 'admin@company.com',
-            'password': 'admin987654321-new',
+            'password': 'Admin987654321new',
         },
     )
     assert login_with_new_password_response.status_code == 200

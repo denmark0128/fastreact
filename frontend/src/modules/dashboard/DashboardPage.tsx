@@ -10,7 +10,7 @@ const dayKeys = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday
 function DashboardPage() {
   const navigate = useNavigate()
   const employeesQuery = useEmployees()
-  const employees = employeesQuery.data?.data ?? []
+  const employees = employeesQuery.data?.data.items ?? []
   const todayKey = dayKeys[new Date().getDay()]
 
   const unavailableToday = employees
@@ -47,10 +47,10 @@ function DashboardPage() {
         {stats.map((stat) => (
           <Card key={stat.label}>
             <CardHeader>
-              <CardTitle className="text-sm font-medium text-slate-500">{stat.label}</CardTitle>
+              <CardTitle className="text-sm font-medium text-slate-500 dark:text-slate-400">{stat.label}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold text-slate-900">{stat.value}</p>
+              <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">{stat.value}</p>
             </CardContent>
           </Card>
         ))}
@@ -62,15 +62,15 @@ function DashboardPage() {
         </CardHeader>
         <CardContent>
           {employeesQuery.isLoading ? (
-            <p className="text-sm text-slate-500">Loading employees...</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Loading employees...</p>
           ) : unavailableToday.length === 0 ? (
-            <p className="text-sm text-slate-500">No unavailable or day-off employees today.</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">No unavailable or day-off employees today.</p>
           ) : (
             <ul className="space-y-2 text-sm">
               {unavailableToday.map((item) => (
                 <li
                   key={item.id}
-                  className="cursor-pointer rounded-md border border-slate-200 bg-slate-50 px-3 py-2 transition-colors hover:bg-slate-100"
+                  className="cursor-pointer rounded-md border border-slate-200 bg-slate-50 px-3 py-2 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
                   role="button"
                   tabIndex={0}
                   onClick={() => navigate(`/employees/${item.id}`)}
@@ -83,8 +83,8 @@ function DashboardPage() {
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div>
-                      <p className="font-medium text-slate-900">{item.name}</p>
-                      <p className="text-slate-500">{item.department}</p>
+                      <p className="font-medium text-slate-900 dark:text-slate-100">{item.name}</p>
+                      <p className="text-slate-500 dark:text-slate-400">{item.department}</p>
                     </div>
                     <Badge variant={item.reasonVariant}>{item.reason}</Badge>
                   </div>
