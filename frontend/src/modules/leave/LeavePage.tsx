@@ -273,7 +273,75 @@ function LeavePage() {
           {!isLoading && !hasItems ? <p className="text-sm text-slate-500">No leave requests yet.</p> : null}
 
           {hasItems ? (
-            <div className="overflow-x-auto">
+            <div className="space-y-3 md:hidden">
+              {paginatedItems.map((request) => (
+                <div key={request.id} className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">{request.employee_name ?? '—'}</p>
+                      <p className="text-xs capitalize text-slate-500">{request.leave_type.replace('_', ' ')}</p>
+                    </div>
+                    <Badge className={`${statusStyle[request.status]} border capitalize transition-colors`}>
+                      {request.status}
+                    </Badge>
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <p className="text-slate-500">Dates</p>
+                      <p className="font-medium text-slate-900">{request.start_date} to {request.end_date}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-500">Days</p>
+                      <p className="font-medium text-slate-900">{diffDays(request.start_date, request.end_date)}</p>
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <p className="line-clamp-3 whitespace-pre-wrap text-xs text-slate-700">{request.reason || '—'}</p>
+                    {request.review_note ? <p className="mt-1 text-xs text-slate-500">Reviewer note: {request.review_note}</p> : null}
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {canReview && request.status === 'pending' ? (
+                      <DropdownMenu modal={false}>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={reviewLeaveMutation.isPending}
+                            aria-label="Open actions"
+                          >
+                            <SquarePen className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleReview(request.id, 'approved')}>Approve</DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-red-600 focus:bg-red-50 focus:text-red-700"
+                            onClick={() => handleReview(request.id, 'rejected')}
+                          >
+                            Reject
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : null}
+
+                    {allowEmployeeCancel && request.status === 'pending' ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleCancel(request.id)}
+                        disabled={cancelLeaveMutation.isPending}
+                      >
+                        Cancel request
+                      </Button>
+                    ) : null}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : null}
+
+          {hasItems ? (
+            <div className="hidden overflow-x-auto md:block">
               <table className="w-full table-fixed border-collapse text-sm">
                 <colgroup>
                   <col className="w-44" />

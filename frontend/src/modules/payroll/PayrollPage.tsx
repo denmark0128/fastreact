@@ -192,7 +192,51 @@ function PayrollPage() {
               <CardTitle className="text-base">Employee Adjustments (Optional)</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
+              <div className="space-y-3 md:hidden">
+                {editableEmployees.map((employee) => {
+                  const values = adjustments[employee.id] ?? {}
+                  return (
+                    <div key={employee.id} className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                      <p className="text-sm font-semibold text-slate-900">{employee.profile_name}</p>
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        <Input
+                          value={values.actual_minutes ?? ''}
+                          onChange={(event) => handleAdjustmentChange(employee.id, 'actual_minutes', event.target.value)}
+                          placeholder="Actual mins"
+                        />
+                        <Input
+                          value={values.late_minutes ?? ''}
+                          onChange={(event) => handleAdjustmentChange(employee.id, 'late_minutes', event.target.value)}
+                          placeholder="Late mins"
+                        />
+                        <Input
+                          value={values.overtime_minutes ?? ''}
+                          onChange={(event) => handleAdjustmentChange(employee.id, 'overtime_minutes', event.target.value)}
+                          placeholder="OT mins"
+                        />
+                        <Input
+                          value={values.allowances ?? ''}
+                          onChange={(event) => handleAdjustmentChange(employee.id, 'allowances', event.target.value)}
+                          placeholder="Allowance"
+                        />
+                        <Input
+                          value={values.other_deductions ?? ''}
+                          onChange={(event) => handleAdjustmentChange(employee.id, 'other_deductions', event.target.value)}
+                          placeholder="Deduction"
+                        />
+                      </div>
+                      <Input
+                        className="mt-2"
+                        value={values.notes ?? ''}
+                        onChange={(event) => handleAdjustmentChange(employee.id, 'notes', event.target.value)}
+                        placeholder="Optional notes"
+                      />
+                    </div>
+                  )
+                })}
+              </div>
+
+              <div className="hidden overflow-x-auto md:block">
                 <table className="w-full table-fixed border-collapse text-sm">
                   <colgroup>
                     <col className="w-40" />
@@ -281,7 +325,33 @@ function PayrollPage() {
             {!recordsQuery.isLoading && records.length === 0 ? <p className="text-sm text-slate-500">No records for this cutoff.</p> : null}
 
             {records.length > 0 ? (
-              <div className="overflow-x-auto">
+              <div className="space-y-3 md:hidden">
+                {records.map((record) => (
+                  <div key={record.id} className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                    <p className="text-sm font-semibold text-slate-900">{record.profile_name}</p>
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <p className="text-slate-500">Late / UT / OT</p>
+                        <p className="font-medium text-slate-900">
+                          {record.late_minutes} / {record.undertime_minutes} / {record.overtime_minutes}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-slate-500">Gross</p>
+                        <p className="font-medium text-slate-900">{formatMoney(record.gross_pay)}</p>
+                      </div>
+                    </div>
+                    <div className="mt-2 text-xs">
+                      <p className="text-slate-500">Net</p>
+                      <p className="text-sm font-semibold text-slate-900">{formatMoney(record.net_pay)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+
+            {records.length > 0 ? (
+              <div className="hidden overflow-x-auto md:block">
                 <table className="w-full table-fixed border-collapse text-sm">
                   <colgroup>
                     <col className="w-44" />

@@ -29,6 +29,7 @@ const employeeSchema = z.object({
   employment_type: z.enum(['regular', 'trainee', 'intern', 'probationary', 'contractual', 'part_time']),
   rate_type: z.enum(['daily', 'monthly']),
   rate_amount: z.number().min(0, 'Rate must be 0 or greater'),
+  hourly_rate: z.number().min(0, 'Hourly rate must be 0 or greater'),
   weekly_schedule: z.object({
     monday: z.string().optional(),
     tuesday: z.string().optional(),
@@ -70,11 +71,40 @@ const scheduleDays = [
   { key: 'sunday', label: 'Sunday' },
 ] as const
 
+const formTabs = [
+  { value: 'basic', label: 'Basic' },
+  { value: 'personal', label: 'Personal' },
+  { value: 'employment', label: 'Employment' },
+  { value: 'compensation', label: 'Compensation' },
+  { value: 'schedule', label: 'Schedule' },
+] as const
+
+type FormTabValue = (typeof formTabs)[number]['value']
+
 function EmployeeForm({ initialEmployee, departmentOptions = [], scheduleTemplate = {}, loading = false, onSubmit }: EmployeeFormProps) {
   const [birthDateOpen, setBirthDateOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState<FormTabValue>('basic')
   const effectiveDefaultSchedule = {
     ...defaultSchedule,
     ...scheduleTemplate,
+  }
+
+  const currentTabIndex = formTabs.findIndex((tab) => tab.value === activeTab)
+  const canGoPrev = currentTabIndex > 0
+  const canGoNext = currentTabIndex < formTabs.length - 1
+
+  const goToPrevTab = () => {
+    if (!canGoPrev) {
+      return
+    }
+    setActiveTab(formTabs[currentTabIndex - 1].value)
+  }
+
+  const goToNextTab = () => {
+    if (!canGoNext) {
+      return
+    }
+    setActiveTab(formTabs[currentTabIndex + 1].value)
   }
 
   const { control, handleSubmit, setValue } = useForm<EmployeeFormValues>({
@@ -93,6 +123,7 @@ function EmployeeForm({ initialEmployee, departmentOptions = [], scheduleTemplat
       employment_type: initialEmployee?.employment_type ?? 'regular',
       rate_type: initialEmployee?.rate_type ?? 'monthly',
       rate_amount: initialEmployee?.rate_amount ?? 0,
+      hourly_rate: initialEmployee?.hourly_rate ?? 0,
       weekly_schedule: {
         monday: initialEmployee?.weekly_schedule?.monday ?? effectiveDefaultSchedule.monday,
         tuesday: initialEmployee?.weekly_schedule?.tuesday ?? effectiveDefaultSchedule.tuesday,
@@ -128,16 +159,22 @@ function EmployeeForm({ initialEmployee, departmentOptions = [], scheduleTemplat
   }
 
   return (
-    <form className="space-y-3" onSubmit={handleSubmit(submitForm)}>
-      <Tabs defaultValue="basic">
-        <div className="overflow-x-auto pb-1">
-          <TabsList>
-            <TabsTrigger value="basic">Basic</TabsTrigger>
-            <TabsTrigger value="personal">Personal</TabsTrigger>
-            <TabsTrigger value="employment">Employment</TabsTrigger>
-            <TabsTrigger value="compensation">Compensation</TabsTrigger>
-            <TabsTrigger value="schedule">Schedule</TabsTrigger>
-          </TabsList>
+    <form className="mx-auto w-full max-w-sm space-y-3 pb-20 md:max-w-none md:pb-0" onSubmit={handleSubmit(submitForm)}>
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as FormTabValue)}>
+        <div className="space-y-2">
+          <div className="hidden overflow-x-auto pb-1 md:block">
+            <TabsList>
+              {formTabs.map((tab) => (
+                <TabsTrigger key={tab.value} value={tab.value}>
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
+
+          <p className="text-xs text-slate-500 md:hidden">
+            Section {currentTabIndex + 1} of {formTabs.length}: {formTabs[currentTabIndex]?.label}
+          </p>
         </div>
 
         <TabsContent value="basic" className="mt-3">
@@ -350,6 +387,23 @@ function EmployeeForm({ initialEmployee, departmentOptions = [], scheduleTemplat
                 </div>
               )}
             />
+            <Controller
+              name="hourly_rate"
+              control={control}
+              render={({ field, fieldState }) => (
+                <div className="space-y-1">
+                  <Label>Hourly Rate</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={field.value}
+                    onChange={(event) => field.onChange(Number(event.target.value))}
+                  />
+                  {fieldState.error ? <p className="text-xs text-red-600">{fieldState.error.message}</p> : null}
+                </div>
+              )}
+            />
           </div>
         </TabsContent>
 
@@ -388,10 +442,27 @@ function EmployeeForm({ initialEmployee, departmentOptions = [], scheduleTemplat
         </TabsContent>
       </Tabs>
 
-      <div className="flex justify-end">
+      <div className="hidden justify-end md:flex">
         <Button type="submit" disabled={loading}>
           {initialEmployee ? 'Update Employee' : 'Create Employee'}
         </Button>
+      </div>
+
+      <div className="sticky bottom-0 z-10 border-t border-border bg-background/95 p-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden">
+        <div className="mx-auto flex max-w-sm items-center gap-2">
+          <Button type="button" variant="outline" className="flex-1" disabled={!canGoPrev} onClick={goToPrevTab}>
+            Previous
+          </Button>
+          {canGoNext ? (
+            <Button type="button" className="flex-1" onClick={goToNextTab}>
+              Next
+            </Button>
+          ) : (
+            <Button type="submit" className="flex-1" disabled={loading}>
+              {loading ? 'Saving...' : initialEmployee ? 'Update Employee' : 'Create Employee'}
+            </Button>
+          )}
+        </div>
       </div>
     </form>
   )

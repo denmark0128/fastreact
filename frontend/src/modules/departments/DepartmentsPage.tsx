@@ -166,7 +166,52 @@ function DepartmentsPage() {
           ) : null}
 
           {filteredAndSortedDepartments.length > 0 ? (
-            <div className="overflow-x-auto">
+            <div className="space-y-3 md:hidden">
+              {paginatedDepartments.map((department) => (
+                <div
+                  key={department.id}
+                  className="cursor-pointer rounded-md border border-slate-200 bg-slate-50 p-3 transition-colors hover:bg-slate-100"
+                  onClick={() => navigate(`/departments/${department.id}`)}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">{department.name}</p>
+                      <p className="text-xs text-slate-500">Head ID: {department.head_employee_id ?? '-'}</p>
+                    </div>
+                    {canManageDepartments ? (
+                      <div onClick={(event) => event.stopPropagation()}>
+                        <DropdownMenu modal={false}>
+                          <DropdownMenuTrigger asChild>
+                            <Button size="sm" variant="outline" aria-label="Open actions">
+                              <SquarePen className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => openEditModal(department)}>Edit</DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-red-600 focus:bg-red-50 focus:text-red-700"
+                              disabled={deleteDepartmentMutation.isPending}
+                              onClick={() => {
+                                if (window.confirm('Delete this department?')) {
+                                  deleteDepartmentMutation.mutate(department.id)
+                                }
+                              }}
+                            >
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    ) : null}
+                  </div>
+                  <p className="mt-3 text-xs text-slate-600">{department.description || 'No description provided.'}</p>
+                </div>
+              ))}
+            </div>
+          ) : null}
+
+          {filteredAndSortedDepartments.length > 0 ? (
+            <div className="hidden overflow-x-auto md:block">
               <table className="w-full table-fixed border-collapse text-sm">
                 <colgroup>
                   <col className="w-56" />

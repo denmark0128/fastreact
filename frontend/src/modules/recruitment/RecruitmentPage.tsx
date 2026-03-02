@@ -215,7 +215,59 @@ function RecruitmentPage() {
           {!jobPostingsQuery.isLoading && !jobHasData ? <p className="text-sm text-slate-500">No roles posted yet.</p> : null}
 
           {jobHasData ? (
-            <div className="overflow-x-auto">
+            <div className="space-y-3 md:hidden">
+              {paginatedItems.map((posting) => (
+                <div key={posting.id} className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">{posting.title}</p>
+                      <p className="text-xs text-slate-500">{posting.department}</p>
+                    </div>
+                    <Badge variant="secondary" className="capitalize">
+                      {posting.status.replace('_', ' ')}
+                    </Badge>
+                  </div>
+                  <p className="mt-2 line-clamp-3 text-xs text-slate-600">{posting.description || 'No description yet.'}</p>
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <p className="text-slate-500">Applications</p>
+                      <p className="font-medium text-slate-900">{posting.application_count}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-500">Posted</p>
+                      <p className="font-medium text-slate-900">{new Date(posting.created_at).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                  {canManage ? (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Select
+                        value={posting.status}
+                        onChange={(event) => handleUpdateJobStatus(posting.id, event.target.value as JobStatus)}
+                        className="w-32"
+                      >
+                        {JOB_STATUSES.map((status) => (
+                          <option key={status} value={status}>
+                            {status.replace('_', ' ')}
+                          </option>
+                        ))}
+                      </Select>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDeleteJob(posting.id)}
+                        disabled={deleteJobMutation.isPending}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          ) : null}
+
+          {jobHasData ? (
+            <div className="hidden overflow-x-auto md:block">
               <table className="w-full table-fixed border-collapse text-sm">
                 <colgroup>
                   <col className="w-60" />
@@ -343,7 +395,67 @@ function RecruitmentPage() {
               ) : null}
 
               {applicationsVisible ? (
-                <div className="overflow-x-auto">
+                <div className="space-y-3 md:hidden">
+                  {applications.map((application) => (
+                    <div key={application.id} className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-semibold text-slate-900">{application.applicant_name}</p>
+                          <p className="text-xs text-slate-500">{application.applicant_email}</p>
+                        </div>
+                        <Select
+                          value={application.status}
+                          onChange={(event) =>
+                            handleUpdateApplication(application.id, { status: event.target.value as ApplicationStatus })
+                          }
+                          className="w-36"
+                        >
+                          {APPLICATION_STATUSES.map((status) => (
+                            <option key={status} value={status}>
+                              {status}
+                            </option>
+                          ))}
+                        </Select>
+                      </div>
+                      <div className="mt-3 grid grid-cols-1 gap-2 text-xs">
+                        <div>
+                          <p className="text-slate-500">Role</p>
+                          <p className="font-medium text-slate-900">{application.job_title ?? '—'}</p>
+                        </div>
+                        <div>
+                          <p className="text-slate-500">Phone</p>
+                          <p className="font-medium text-slate-900">{application.phone || 'No phone'}</p>
+                        </div>
+                      </div>
+                      {application.resume_url ? (
+                        <a className="mt-2 inline-block text-xs text-sky-600 underline" href={application.resume_url} target="_blank" rel="noreferrer">
+                          Resume
+                        </a>
+                      ) : null}
+                      <div className="mt-3">
+                        <p className="mb-1 text-xs text-slate-500">Notes</p>
+                        <Textarea
+                          className="min-h-[56px] py-1"
+                          rows={2}
+                          value={applicationNotes[application.id] ?? application.notes ?? ''}
+                          onChange={(event) =>
+                            setApplicationNotes((current) => ({ ...current, [application.id]: event.target.value }))
+                          }
+                          onBlur={() =>
+                            handleUpdateApplication(application.id, {
+                              notes: applicationNotes[application.id] ?? application.notes ?? '',
+                            })
+                          }
+                          placeholder="Stage notes"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+
+              {applicationsVisible ? (
+                <div className="hidden overflow-x-auto md:block">
                   <table className="w-full table-fixed border-collapse text-sm">
                     <colgroup>
                       <col className="w-44" />

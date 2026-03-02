@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/ca
 import Modal from '../../components/ui/modal'
 import { useAuth } from '../../context/AuthContext'
 import type { EmployeePayload } from '../../types'
+import { useDepartments } from '../settings/hooks'
 import EmployeeForm from './EmployeeForm'
 import { useEmployees, useUpdateEmployee } from './hooks'
 import { getEmploymentStatusBadgeVariant, getEmploymentStatusLabel } from './status'
@@ -23,7 +24,9 @@ function EmployeeDetailPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
   const employeesQuery = useEmployees()
+  const departmentsQuery = useDepartments()
   const updateEmployeeMutation = useUpdateEmployee()
+  const departmentOptions = (departmentsQuery.data?.data ?? []).map((department) => department.name)
 
   const employee = useMemo(() => {
     const id = Number(employeeId)
@@ -66,6 +69,7 @@ function EmployeeDetailPage() {
           employment_type: payload.employment_type,
           rate_type: payload.rate_type,
           rate_amount: payload.rate_amount,
+          hourly_rate: payload.hourly_rate,
         },
       },
       {
@@ -195,6 +199,7 @@ function EmployeeDetailPage() {
         <Modal open={isEditModalOpen} title="Update Employee" onClose={() => setIsEditModalOpen(false)}>
           <EmployeeForm
             initialEmployee={employee}
+            departmentOptions={departmentOptions}
             onSubmit={handleUpdate}
             loading={updateEmployeeMutation.isPending}
           />

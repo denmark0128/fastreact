@@ -118,6 +118,7 @@ function EmployeesPage() {
             employment_type: payload.employment_type,
             rate_type: payload.rate_type,
             rate_amount: payload.rate_amount,
+            hourly_rate: payload.hourly_rate,
           },
         },
         { onSuccess: closeModal },
@@ -153,7 +154,126 @@ function EmployeesPage() {
           ) : null}
 
           {filteredAndSortedEmployees.length > 0 ? (
-            <div className="overflow-x-auto">
+            <div className="space-y-3 md:hidden">
+              {paginatedEmployees.map((record) => (
+                <div
+                  key={record.id}
+                  className="cursor-pointer rounded-md border border-slate-200 bg-slate-50 p-3 transition-colors hover:bg-slate-100"
+                  onClick={() => navigate(`/employees/${record.id}`)}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">{record.profile_name}</p>
+                      <p className="text-xs text-slate-500">ID: {record.id} • Code: {record.employee_code}</p>
+                    </div>
+                    <Badge variant={getEmploymentStatusBadgeVariant(record.employment_status)}>
+                      {getEmploymentStatusLabel(record.employment_status)}
+                    </Badge>
+                  </div>
+
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-600">
+                    <div>
+                      <p className="text-slate-500">User ID</p>
+                      <p className="font-medium text-slate-900">{record.user_id ?? '-'}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-500">Biometric ID</p>
+                      <p className="font-medium text-slate-900">{record.biometric_id || '-'}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-500">Department</p>
+                      <p className="font-medium text-slate-900">{record.department}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-500">Position</p>
+                      <p className="font-medium text-slate-900">{record.position}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-500">Employment Type</p>
+                      <p className="font-medium capitalize text-slate-900">{record.employment_type.replace('_', ' ')}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-500">Rate Type</p>
+                      <p className="font-medium capitalize text-slate-900">{record.rate_type}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-500">Rate Amount</p>
+                      <p className="font-medium text-slate-900">{record.rate_amount}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-500">Hourly Rate</p>
+                      <p className="font-medium text-slate-900">{record.hourly_rate}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-500">Birth Date</p>
+                      <p className="font-medium text-slate-900">{record.birth_date || '-'}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-500">Civil Status</p>
+                      <p className="font-medium capitalize text-slate-900">{record.civil_status || '-'}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-500">Contact Number</p>
+                      <p className="font-medium text-slate-900">{record.contact_number || '-'}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-500">Emergency Contact</p>
+                      <p className="font-medium text-slate-900">{record.emergency_contact_name || '-'}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-slate-500">Emergency Number</p>
+                      <p className="font-medium text-slate-900">{record.emergency_contact_number || '-'}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-slate-500">Address</p>
+                      <p className="font-medium text-slate-900">
+                        {[record.street, record.city, record.region].filter(Boolean).join(', ') || '-'}
+                      </p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-slate-500">Weekly Schedule</p>
+                      <div className="mt-1 grid grid-cols-2 gap-x-2 gap-y-1">
+                        {Object.entries(record.weekly_schedule ?? {}).map(([day, hours]) => (
+                          <p key={`${record.id}-${day}`} className="text-slate-700">
+                            <span className="capitalize">{day.slice(0, 3)}</span>: {hours || 'Off'}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {canManageEmployees ? (
+                    <div className="mt-3 flex justify-end" onClick={(event) => event.stopPropagation()}>
+                      <DropdownMenu modal={false}>
+                        <DropdownMenuTrigger asChild>
+                          <Button size="sm" variant="outline" aria-label="Open actions">
+                            <SquarePen className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => onEditClick(record)}>Edit</DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-red-600 focus:bg-red-50 focus:text-red-700"
+                            disabled={deleteEmployeeMutation.isPending}
+                            onClick={() => {
+                              if (window.confirm('Delete this employee?')) {
+                                deleteEmployeeMutation.mutate(record.id)
+                              }
+                            }}
+                          >
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          ) : null}
+
+          {filteredAndSortedEmployees.length > 0 ? (
+            <div className="hidden overflow-x-auto md:block">
               <table className="w-full table-fixed border-collapse text-sm">
                 <colgroup>
                   <col className="w-28" />

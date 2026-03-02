@@ -89,7 +89,29 @@ function AuditTrailPage() {
               {!auditLogsQuery.isLoading && logs.length === 0 ? <p className="text-sm text-muted-foreground">No audit records found.</p> : null}
 
               {logs.length > 0 ? (
-                <div className="w-full overflow-x-auto">
+                <div className="space-y-3 md:hidden">
+                  {logs.map((log) => (
+                    <div key={log.id} className="rounded-md border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-900">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{log.action}</p>
+                          <p className="text-xs text-muted-foreground">{formatDateTime(log.created_at)}</p>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{log.entity_type} #{log.entity_id ?? '-'}</p>
+                      </div>
+                      <div className="mt-2 text-xs">
+                        <p className="text-muted-foreground">Actor: {log.actor_email ?? '-'}</p>
+                      </div>
+                      <pre className="mt-2 whitespace-pre-wrap break-all text-xs text-foreground">
+                        {log.details ? JSON.stringify(log.details) : '-'}
+                      </pre>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+
+              {logs.length > 0 ? (
+                <div className="hidden w-full overflow-x-auto md:block">
                   <table className="w-full border-collapse text-sm">
                     <thead>
                       <tr className="border-b text-left text-muted-foreground">

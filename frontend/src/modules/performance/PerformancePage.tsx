@@ -163,7 +163,71 @@ function PerformancePage() {
           {!performanceQuery.isLoading && !hasItems ? <p className="text-sm text-slate-500 dark:text-slate-400">No reviews yet.</p> : null}
 
           {hasItems ? (
-            <div className="overflow-x-auto">
+            <div className="space-y-3 md:hidden">
+              {paginatedItems.map((review) => (
+                <div key={review.id} className="rounded-md border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-900">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{review.employee_name ?? '—'}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{review.review_period} • {review.cycle.replace('_', ' ')}</p>
+                    </div>
+                    <Badge className={`${statusBadge[review.status]} border`}>{review.status}</Badge>
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <p className="text-slate-500 dark:text-slate-400">Rating</p>
+                      {canEditRows ? (
+                        <Input
+                          type="number"
+                          min={1}
+                          max={5}
+                          value={review.rating}
+                          onChange={(event) => handleRatingChange(review.id, Number(event.target.value))}
+                        />
+                      ) : (
+                        <p className="font-medium text-slate-900 dark:text-slate-100">{review.rating}</p>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-slate-500 dark:text-slate-400">Reviewer</p>
+                      <p className="font-medium text-slate-900 dark:text-slate-100">{review.reviewer_name ?? '—'}</p>
+                    </div>
+                  </div>
+                  <div className="mt-3 text-xs text-slate-700 dark:text-slate-300">
+                    <p className="line-clamp-2">{review.strengths || 'No notes'}</p>
+                    {review.improvements ? <p className="mt-1 text-slate-500 dark:text-slate-400">Areas: {review.improvements}</p> : null}
+                    {review.goals ? <p className="mt-1 text-slate-500 dark:text-slate-400">Goals: {review.goals}</p> : null}
+                  </div>
+                  {canEditRows ? (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Select
+                        value={review.status}
+                        onChange={(event) => handleStatusChange(review.id, event.target.value as ReviewStatus)}
+                        className="w-40"
+                      >
+                        {REVIEW_STATUSES.map((status) => (
+                          <option key={status} value={status}>
+                            {status}
+                          </option>
+                        ))}
+                      </Select>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(review.id)}
+                        disabled={deleteReviewMutation.isPending}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          ) : null}
+
+          {hasItems ? (
+            <div className="hidden overflow-x-auto md:block">
               <table className="w-full table-fixed border-collapse text-sm">
                 <colgroup>
                   <col className="w-48" />
