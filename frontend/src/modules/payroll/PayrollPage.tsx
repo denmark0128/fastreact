@@ -2,25 +2,21 @@ import { useMemo, useState } from 'react'
 
 import PageHeader from '../../components/shared/PageHeader'
 import { Alert } from '../../components/ui/alert'
+import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 import { DatePicker } from '../../components/ui/date-picker'
-import { Input } from '../../components/ui/input'
 import { useAuth } from '../../context/AuthContext'
+import { ADDITION_TYPES, DEDUCTION_TYPES, type Employee } from '../../types'
 import { useEmployees } from '../employees/hooks'
-import { usePayrollRecords, usePayrollSummary, useProcessPayroll } from './hooks'
-
-type AdjustmentValue = {
-  actual_minutes?: string
-  late_minutes?: string
-  overtime_minutes?: string
-  allowances?: string
-  other_deductions?: string
-  notes?: string
-}
+import { useAdjustmentItems, usePayrollRecords, usePayrollSummary, useProcessPayroll } from './hooks'
+import { AdjustmentModal } from './AdjustmentModal'
 
 function toIsoDate(value: Date) {
-  return value.toISOString().slice(0, 10)
+  const y = value.getFullYear()
+  const m = String(value.getMonth() + 1).padStart(2, '0')
+  const d = String(value.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
 }
 
 function formatMoney(value: number) {
@@ -43,79 +39,45 @@ function PayrollPage() {
   const [cutoffStart, setCutoffStart] = useState(toIsoDate(monthStart))
   const [cutoffEnd, setCutoffEnd] = useState(toIsoDate(monthMid))
   const [payDate, setPayDate] = useState(toIsoDate(monthEnd))
-  const [adjustments, setAdjustments] = useState<Record<number, AdjustmentValue>>({})
+  const [modalEmployee, setModalEmployee] = useState<Employee | null>(null)
 
   const employeesQuery = useEmployees()
   const recordsQuery = usePayrollRecords({ cutoff_start: cutoffStart, cutoff_end: cutoffEnd })
   const summaryQuery = usePayrollSummary({ cutoff_start: cutoffStart, cutoff_end: cutoffEnd })
+  const adjustmentItemsQuery = useAdjustmentItems({ cutoff_start: cutoffStart, cutoff_end: cutoffEnd })
   const processPayrollMutation = useProcessPayroll()
 
   const employees = employeesQuery.data?.data.items ?? []
   const records = recordsQuery.data?.data ?? []
   const summary = summaryQuery.data?.data
+  const allAdjustmentItems = adjustmentItemsQuery.data?.data ?? []
 
   const editableEmployees = useMemo(
-    () => employees.filter((employee) => ['active', 'probation'].includes(employee.employment_status.toLowerCase())),
+    () => employees.filter((emp) => ['active', 'probation'].includes(emp.employment_status.toLowerCase())),
     [employees],
   )
 
-  const handleAdjustmentChange = (employeeId: number, key: keyof AdjustmentValue, value: string) => {
-    setAdjustments((current) => ({
-      ...current,
-      [employeeId]: {
-        ...current[employeeId],
-        [key]: value,
-      },
-    }))
-  }
-
-  const parseNumber = (value?: string) => {
-    if (!value?.trim()) {
-      return undefined
+  // Build per-employee adjustment summaries
+  const adjustmentsByEmployee = useMemo(() => {
+    const map: Record<number, { count: number; totalAdditions: number; totalDeductions: number }> = {}
+    for (const item of allAdjustmentItems) {
+      if (!map[item.employee_id]) {
+        map[item.employee_id] = { count: 0, totalAdditions: 0, totalDeductions: 0 }
+      }
+      map[item.employee_id].count++
+      if (ADDITION_TYPES.has(item.type)) {
+        map[item.employee_id].totalAdditions += item.amount
+      } else if (DEDUCTION_TYPES.has(item.type)) {
+        map[item.employee_id].totalDeductions += item.amount
+      }
     }
-    const parsed = Number(value)
-    return Number.isFinite(parsed) ? parsed : undefined
-  }
-
+    return map
+  }, [allAdjustmentItems])
   const processCutoff = () => {
-    const adjustmentPayload = Object.entries(adjustments)
-      .map(([employeeId, values]) => {
-        const actualMinutes = parseNumber(values.actual_minutes)
-        const lateMinutes = parseNumber(values.late_minutes)
-        const overtimeMinutes = parseNumber(values.overtime_minutes)
-        const allowances = parseNumber(values.allowances)
-        const otherDeductions = parseNumber(values.other_deductions)
-        const notes = values.notes?.trim() || undefined
-
-        const hasInput =
-          actualMinutes !== undefined ||
-          lateMinutes !== undefined ||
-          overtimeMinutes !== undefined ||
-          allowances !== undefined ||
-          otherDeductions !== undefined ||
-          notes !== undefined
-
-        if (!hasInput) {
-          return null
-        }
-
-        return {
-          employee_id: Number(employeeId),
-          actual_minutes: actualMinutes,
-          late_minutes: lateMinutes ?? 0,
-          overtime_minutes: overtimeMinutes ?? 0,
-          allowances: allowances ?? 0,
-          other_deductions: otherDeductions ?? 0,
-          notes,
-        }
-      })
-      .filter((item): item is NonNullable<typeof item> => item !== null)
-
     processPayrollMutation.mutate({
       cutoff_start: cutoffStart,
       cutoff_end: cutoffEnd,
       pay_date: payDate,
-      adjustments: adjustmentPayload,
     })
   }
 
@@ -130,6 +92,7 @@ function PayrollPage() {
           </Alert>
         ) : null}
 
+        {/* Cutoff dates */}
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Payroll Cutoff</CardTitle>
@@ -157,6 +120,7 @@ function PayrollPage() {
           </CardContent>
         </Card>
 
+        {/* Summary */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <Card>
             <CardHeader>
@@ -186,88 +150,66 @@ function PayrollPage() {
           </Card>
         </div>
 
+        {/* Per-employee adjustments */}
         {canProcessPayroll ? (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Employee Adjustments (Optional)</CardTitle>
+              <CardTitle className="text-base">Employee Adjustments</CardTitle>
+              <p className="text-xs text-slate-500">
+                Pre-save cash advances, allowances, loans, and bonuses per employee before processing.
+                Stored items are automatically applied when you run Process Cutoff.
+              </p>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full table-fixed border-collapse text-sm">
-                  <colgroup>
-                    <col className="w-40" />
-                    <col className="w-32" />
-                    <col className="w-24" />
-                    <col className="w-24" />
-                    <col className="w-28" />
-                    <col className="w-28" />
-                    <col className="w-52" />
-                  </colgroup>
-                  <thead>
-                    <tr className="border-b text-left text-slate-500">
-                      <th className="py-2">Employee</th>
-                      <th className="py-2">Actual Mins</th>
-                      <th className="py-2">Late</th>
-                      <th className="py-2">OT</th>
-                      <th className="py-2">Allowance</th>
-                      <th className="py-2">Deduction</th>
-                      <th className="py-2">Notes</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {editableEmployees.map((employee) => {
-                      const values = adjustments[employee.id] ?? {}
-                      return (
-                        <tr key={employee.id} className="border-b">
-                          <td className="truncate py-2 pr-2">{employee.profile_name}</td>
-                          <td className="py-2 pr-2">
-                            <Input
-                              value={values.actual_minutes ?? ''}
-                              onChange={(event) => handleAdjustmentChange(employee.id, 'actual_minutes', event.target.value)}
-                              placeholder="0"
-                            />
-                          </td>
-                          <td className="py-2 pr-2">
-                            <Input
-                              value={values.late_minutes ?? ''}
-                              onChange={(event) => handleAdjustmentChange(employee.id, 'late_minutes', event.target.value)}
-                              placeholder="0"
-                            />
-                          </td>
-                          <td className="py-2 pr-2">
-                            <Input
-                              value={values.overtime_minutes ?? ''}
-                              onChange={(event) => handleAdjustmentChange(employee.id, 'overtime_minutes', event.target.value)}
-                              placeholder="0"
-                            />
-                          </td>
-                          <td className="py-2 pr-2">
-                            <Input
-                              value={values.allowances ?? ''}
-                              onChange={(event) => handleAdjustmentChange(employee.id, 'allowances', event.target.value)}
-                              placeholder="0"
-                            />
-                          </td>
-                          <td className="py-2 pr-2">
-                            <Input
-                              value={values.other_deductions ?? ''}
-                              onChange={(event) => handleAdjustmentChange(employee.id, 'other_deductions', event.target.value)}
-                              placeholder="0"
-                            />
-                          </td>
-                          <td className="py-2">
-                            <Input
-                              value={values.notes ?? ''}
-                              onChange={(event) => handleAdjustmentChange(employee.id, 'notes', event.target.value)}
-                              placeholder="Optional"
-                            />
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
+              {employeesQuery.isLoading ? (
+                <p className="text-sm text-slate-500">Loading employees…</p>
+              ) : editableEmployees.length === 0 ? (
+                <p className="text-sm text-slate-500">No active employees found.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse text-sm">
+                    <thead>
+                      <tr className="border-b text-left text-slate-500">
+                        <th className="py-2 pr-4">Employee</th>
+                        <th className="py-2 pr-4">Department</th>
+                        <th className="py-2 pr-4">Items</th>
+                        <th className="py-2 pr-4 text-right">Additions</th>
+                        <th className="py-2 pr-4 text-right">Deductions</th>
+                        <th className="py-2" />
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {editableEmployees.map((emp) => {
+                        const adj = adjustmentsByEmployee[emp.id]
+                        return (
+                          <tr key={emp.id} className="border-b last:border-0">
+                            <td className="py-2 pr-4 font-medium">{emp.profile_name}</td>
+                            <td className="py-2 pr-4 text-slate-500">{emp.department}</td>
+                            <td className="py-2 pr-4">
+                              {adj?.count ? (
+                                <Badge variant="secondary">{adj.count} item{adj.count !== 1 ? 's' : ''}</Badge>
+                              ) : (
+                                <span className="text-slate-400">—</span>
+                              )}
+                            </td>
+                            <td className="py-2 pr-4 text-right tabular-nums text-emerald-600">
+                              {adj?.totalAdditions ? formatMoney(adj.totalAdditions) : '—'}
+                            </td>
+                            <td className="py-2 pr-4 text-right tabular-nums text-red-600">
+                              {adj?.totalDeductions ? formatMoney(adj.totalDeductions) : '—'}
+                            </td>
+                            <td className="py-2 text-right">
+                              <Button size="sm" variant="outline" onClick={() => setModalEmployee(emp)}>
+                                Adjust
+                              </Button>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </CardContent>
           </Card>
         ) : null}
@@ -285,11 +227,12 @@ function PayrollPage() {
                 <table className="w-full table-fixed border-collapse text-sm">
                   <colgroup>
                     <col className="w-44" />
-                    <col className="w-24" />
-                    <col className="w-24" />
-                    <col className="w-24" />
-                    <col className="w-32" />
-                    <col className="w-32" />
+                    <col className="w-20" />
+                    <col className="w-20" />
+                    <col className="w-20" />
+                    <col className="w-28" />
+                    <col className="w-28" />
+                    <col className="w-28" />
                   </colgroup>
                   <thead>
                     <tr className="border-b text-left text-slate-500">
@@ -297,6 +240,7 @@ function PayrollPage() {
                       <th className="py-2">Late</th>
                       <th className="py-2">UT</th>
                       <th className="py-2">OT</th>
+                      <th className="py-2">Adj. Net</th>
                       <th className="py-2">Gross</th>
                       <th className="py-2">Net</th>
                     </tr>
@@ -308,6 +252,11 @@ function PayrollPage() {
                         <td className="py-2 pr-2">{record.late_minutes}</td>
                         <td className="py-2 pr-2">{record.undertime_minutes}</td>
                         <td className="py-2 pr-2">{record.overtime_minutes}</td>
+                        <td className={`py-2 pr-2 tabular-nums text-xs ${record.allowances - record.other_deductions >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                          {record.allowances - record.other_deductions !== 0
+                            ? formatMoney(record.allowances - record.other_deductions)
+                            : '—'}
+                        </td>
                         <td className="py-2 pr-2">{formatMoney(record.gross_pay)}</td>
                         <td className="py-2">{formatMoney(record.net_pay)}</td>
                       </tr>
@@ -319,6 +268,18 @@ function PayrollPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Adjustment modal */}
+      {modalEmployee ? (
+        <AdjustmentModal
+          open={!!modalEmployee}
+          onClose={() => setModalEmployee(null)}
+          employeeId={modalEmployee.id}
+          employeeName={modalEmployee.profile_name}
+          cutoffStart={cutoffStart}
+          cutoffEnd={cutoffEnd}
+        />
+      ) : null}
     </>
   )
 }

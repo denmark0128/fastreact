@@ -8,6 +8,7 @@ import DashboardPage from '../modules/dashboard/DashboardPage'
 import EmployeesPage from '../modules/employees/EmployeesPage'
 import EmployeeDetailPage from '../modules/employees/EmployeeDetailPage'
 import LeavePage from '../modules/leave/LeavePage'
+import AttendancePage from '../modules/attendance/AttendancePage'
 import PayrollPage from '../modules/payroll/PayrollPage'
 import RecruitmentPage from '../modules/recruitment/RecruitmentPage'
 import PerformancePage from '../modules/performance/PerformancePage'
@@ -46,6 +47,7 @@ export const router = createBrowserRouter([
           { path: 'departments', element: <DepartmentsPage /> },
           { path: 'departments/:departmentId', element: <DepartmentDetailPage /> },
           { path: 'leave', element: <LeavePage /> },
+          { path: 'attendance', element: <AttendancePage /> },
           { path: 'payroll', element: <PayrollPage /> },
           { path: 'recruitment', element: <RecruitmentPage /> },
           { path: 'performance', element: <PerformancePage /> },

@@ -1,15 +1,13 @@
 import { useMemo, useState } from 'react'
 import { AxiosError } from 'axios'
-import { format } from 'date-fns'
-import { CalendarDays } from 'lucide-react'
 import { SquarePen } from 'lucide-react'
 
 import PageHeader from '../../components/shared/PageHeader'
 import { TablePagination } from '../../components/shared/TableControls'
 import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
-import { Calendar } from '../../components/ui/calendar'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
+import { DatePicker } from '../../components/ui/date-picker'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,16 +16,14 @@ import {
 } from '../../components/ui/dropdown-menu'
 import { Input } from '../../components/ui/input'
 import Modal from '../../components/ui/modal'
-import { Popover, PopoverContent, PopoverTrigger } from '../../components/ui/popover'
 import { Select } from '../../components/ui/select'
 import { Textarea } from '../../components/ui/textarea'
 import { useAuth } from '../../context/AuthContext'
 import { useNotification } from '../../context/NotificationContext'
-import { cn } from '../../lib/utils'
 import { useTableControls } from '../../lib/useTableControls'
 import type { LeaveRequest, LeaveRequestPayload, LeaveStatus, LeaveType } from '../../types'
 import { useEmployees } from '../employees/hooks'
-import { useCreateLeaveRequest, useLeaveRequests, useReviewLeaveRequest, useCancelLeaveRequest } from './hooks'
+import { useCancelLeaveRequest, useCreateLeaveRequest, useLeaveRequests, useReviewLeaveRequest } from './hooks'
 
 type LeaveSortKey = 'leave_type' | 'start_date' | 'status' | 'employee_name'
 
@@ -50,21 +46,6 @@ function diffDays(start: string, end: string) {
   const endDate = new Date(end)
   const diff = Math.abs(endDate.getTime() - startDate.getTime())
   return Math.max(1, Math.round(diff / (1000 * 60 * 60 * 24)) + 1)
-}
-
-function toDate(value: string): Date | undefined {
-  if (!value) {
-    return undefined
-  }
-  const parsed = new Date(`${value}T00:00:00`)
-  return Number.isNaN(parsed.getTime()) ? undefined : parsed
-}
-
-function toIsoDate(value: Date | undefined): string {
-  if (!value) {
-    return ''
-  }
-  return format(value, 'yyyy-MM-dd')
 }
 
 function toTitleLabel(value: string) {
@@ -219,8 +200,8 @@ function LeavePage() {
   return (
     <>
       <PageHeader
-        title="Attendance & Leave"
-        subtitle="Submit leave requests, review approvals, and track time off"
+        title="Leave"
+        subtitle="Submit leave requests and track approval status"
         extra={
           <div className="flex items-center gap-2">
             {!canReview ? null : (
@@ -330,9 +311,7 @@ function LeavePage() {
                       </td>
                       <td className="py-2 pr-2">
                         <p className="line-clamp-3 whitespace-pre-wrap text-slate-700">{request.reason || '—'}</p>
-                        {request.review_note ? (
-                          <p className="mt-1 text-xs text-slate-500">Reviewer note: {request.review_note}</p>
-                        ) : null}
+                        {request.review_note ? <p className="mt-1 text-xs text-slate-500">Reviewer note: {request.review_note}</p> : null}
                       </td>
                       <td className="w-20 py-2 pr-2">
                         <div className="flex flex-col items-start gap-2">
@@ -429,49 +408,11 @@ function LeavePage() {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <p className="mb-1 text-xs text-slate-500">Start Date</p>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className={cn('w-full justify-start text-left font-normal', !startDate && 'text-slate-500')}
-                  >
-                    <CalendarDays className="mr-2 h-4 w-4" />
-                    {startDate ? format(toDate(startDate) ?? new Date(), 'PPP') : <span>Pick a date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={toDate(startDate)}
-                    onSelect={(date) => setStartDate(toIsoDate(date))}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <DatePicker value={startDate} onChange={setStartDate} />
             </div>
             <div>
               <p className="mb-1 text-xs text-slate-500">End Date</p>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className={cn('w-full justify-start text-left font-normal', !endDate && 'text-slate-500')}
-                  >
-                    <CalendarDays className="mr-2 h-4 w-4" />
-                    {endDate ? format(toDate(endDate) ?? new Date(), 'PPP') : <span>Pick a date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={toDate(endDate)}
-                    onSelect={(date) => setEndDate(toIsoDate(date))}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <DatePicker value={endDate} onChange={setEndDate} />
             </div>
           </div>
           <div>

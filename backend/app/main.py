@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.attendance.router import router as attendance_router
 from app.audit.router import router as audit_router
 from app.auth.router import router as auth_router
 from app.auth.service import seed_default_accounts
@@ -17,7 +18,9 @@ from app.recruitment.router import router as recruitment_router
 from app.settings.router import router as settings_router
 
 # Import models so Base.metadata.create_all picks them up
+import app.attendance.models  # noqa: F401 – AttendanceRecord
 import app.leave.models  # noqa: F401 – LeaveRequest
+import app.payroll.models  # noqa: F401 – PayrollRecord, PayrollAdjustmentItem
 import app.performance.models  # noqa: F401 – PerformanceReview
 import app.recruitment.models  # noqa: F401 – JobPosting, Application
 
@@ -52,6 +55,7 @@ app.add_middleware(
 
 app.include_router(auth_router, prefix="/api/v1/auth", tags=["Auth"])
 app.include_router(audit_router, prefix="/api/v1/audit", tags=["Audit"])
+app.include_router(attendance_router, prefix="/api/v1/attendance", tags=["Attendance"])
 app.include_router(employees_router, prefix="/api/v1/employees", tags=["Employees"])
 app.include_router(leave_router, prefix="/api/v1/leave", tags=["Leave"])
 app.include_router(payroll_router, prefix="/api/v1/payroll", tags=["Payroll"])

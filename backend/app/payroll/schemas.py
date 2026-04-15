@@ -1,6 +1,43 @@
-from datetime import date
+from datetime import date, datetime
+from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
+
+# ---------------------------------------------------------------------------
+# Adjustment items (modal-based, pre-saved before processing)
+# ---------------------------------------------------------------------------
+
+AdjustmentTypeStr = Literal[
+	"cash_advance",
+	"allowance",
+	"bonus",
+	"sss_loan",
+	"pagibig_loan",
+	"other_deduction",
+	"other_addition",
+]
+
+
+class AdjustmentItemCreate(BaseModel):
+	employee_id: int
+	cutoff_start: date
+	cutoff_end: date
+	type: AdjustmentTypeStr
+	amount: float = Field(gt=0)
+	label: str | None = Field(default=None, max_length=200)
+	notes: str | None = Field(default=None, max_length=500)
+
+
+class AdjustmentItemResponse(BaseModel):
+	id: int
+	employee_id: int
+	cutoff_start: date
+	cutoff_end: date
+	type: str
+	amount: float
+	label: str | None = None
+	notes: str | None = None
+	created_at: datetime
 
 
 class PayrollAdjustment(BaseModel):

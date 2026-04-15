@@ -158,3 +158,34 @@
 - Updated profile summary cards to theme tokens (`bg-muted`, `border-border`, `text-foreground`, `text-muted-foreground`) to remove white tiles in dark mode.
 - Updated dark primary token so default buttons are no longer white blocks in dark mode.
 - Validation: frontend build passes after each theming/UX update (`bun run build`).
+
+## Recent Updates (2026-03-13)
+- Split Leave and Attendance into separate frontend pages and routes.
+- Added dedicated Attendance page/sidebar entry with table view and edit actions.
+- Reworked Attendance add/edit form from inline to modal-based flow.
+- Updated Attendance modal to support no-darkening backdrop behavior.
+- Standardized date picking with shadcn date picker and made attendance time fields typeable (`input[type=time]`).
+- Added attendance template download (CSV/XLSX) endpoint and frontend download actions.
+- Added attendance import support UI improvements and summary messaging.
+- Added Attendance table filters (employee/date range/search) and pagination controls.
+- Upgraded Attendance list to true server-side pagination (`skip`/`limit`) and server-side search (`q`) for consistent totals.
+- Fixed attendance count mismatches between Attendance page and Employee Profile by aligning backend query filtering/limits.
+- Added Monthly Attendance section in Employee Profile with one row per day and month selection.
+- Replaced native month input with shadcn-based month picker component.
+- Updated Employee Profile attendance status logic to show `Day Off` for unscheduled days instead of `Absent`.
+- Wired payroll attendance summarization to prefer `attendance_records` and fall back to biometric punches.
+- Added/updated payroll tests for attendance-record usage and day-off exclusion behavior.
+- Added payroll seeder for attendance scenarios and refactored it to:
+	- use employees from existing employee seeder,
+	- generate varying late/undertime/overtime patterns,
+	- seed full March 2026 coverage,
+	- include deterministic absences,
+	- respect each employee’s own weekly schedule.
+- Added dedicated perfect-attendance payroll verification seed (`EMP-PERF1` / Alex Payroll Test) with:
+	- exact Mon-Fri `08:00-16:00` schedule,
+	- exact monthly rate math for March 2026 validation,
+	- deterministic expected cutoff totals for first-half, second-half, and full-month checks.
+- Fixed payroll stale-rate behavior by making payroll minute-rate calculation derive from `employee.rate_amount` / `rate_type` instead of relying on stored `hourly_rate`.
+- Updated employee create/update logic to auto-derive `hourly_rate` from `rate_amount` when not explicitly overridden, keeping compensation fields aligned.
+- Fixed payroll records/summary filtering to use exact cutoff equality instead of overlapping date-range matching, which removed duplicate-looking rows from multiple payroll runs.
+- Verified backend tests and frontend builds after key changes (`pytest` and `bun run build`).

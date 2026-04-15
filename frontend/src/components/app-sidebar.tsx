@@ -48,6 +48,7 @@ const primaryMenu = [
 const secondaryMenu = [
   { key: '/profile', label: 'My Profile', icon: UserRound },
   { key: '/leave', label: 'Leave', icon: CalendarClock },
+  { key: '/attendance', label: 'Attendance', icon: CalendarClock },
   { key: '/payroll', label: 'Payroll', icon: ClipboardList },
   { key: '/recruitment', label: 'Recruitment', icon: Briefcase },
   { key: '/performance', label: 'Performance', icon: LayoutGrid },

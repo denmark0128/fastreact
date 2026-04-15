@@ -192,6 +192,50 @@ export interface ChangePasswordPayload {
   new_password: string
 }
 
+export type AdjustmentType =
+  | 'cash_advance'
+  | 'allowance'
+  | 'bonus'
+  | 'sss_loan'
+  | 'pagibig_loan'
+  | 'other_deduction'
+  | 'other_addition'
+
+export const ADJUSTMENT_TYPE_LABELS: Record<AdjustmentType, string> = {
+  cash_advance: 'Cash Advance',
+  allowance: 'Allowance',
+  bonus: 'Bonus',
+  sss_loan: 'SSS Loan',
+  pagibig_loan: 'Pag-IBIG Loan',
+  other_deduction: 'Other Deduction',
+  other_addition: 'Other Addition',
+}
+
+export const DEDUCTION_TYPES = new Set<AdjustmentType>(['cash_advance', 'sss_loan', 'pagibig_loan', 'other_deduction'])
+export const ADDITION_TYPES = new Set<AdjustmentType>(['allowance', 'bonus', 'other_addition'])
+
+export interface AdjustmentItem {
+  id: number
+  employee_id: number
+  cutoff_start: string
+  cutoff_end: string
+  type: AdjustmentType
+  amount: number
+  label: string | null
+  notes: string | null
+  created_at: string
+}
+
+export interface AdjustmentItemCreate {
+  employee_id: number
+  cutoff_start: string
+  cutoff_end: string
+  type: AdjustmentType
+  amount: number
+  label?: string
+  notes?: string
+}
+
 export interface PayrollAdjustmentPayload {
   employee_id: number
   actual_minutes?: number

@@ -7,8 +7,16 @@ from app.audit.service import create_audit_log
 from app.auth.models import User, UserRole
 from app.dependencies import get_db, get_current_user, require_roles
 from app.employees.models import Employee
-from app.payroll.schemas import PayrollProcessRequest
-from app.payroll.service import get_payroll_summary, list_payroll_records, process_payroll_cutoff
+from app.payroll.schemas import AdjustmentItemCreate, PayrollProcessRequest
+from app.payroll.service import (
+	create_adjustment_item,
+	delete_adjustment_item,
+	get_payroll_summary,
+	list_adjustment_items,
+	list_payroll_records,
+	process_payroll_cutoff,
+	_item_to_dict,
+)
 from app.utils.responses import success_response
 
 router = APIRouter()
@@ -62,6 +70,61 @@ def _resolve_employee_filter_for_current_user(current_user: User, db: Session) -
 @router.get("/health")
 def payroll_health():
     return success_response("Payroll module scaffold ready")
+
+
+# ---------------------------------------------------------------------------
+# Adjustment items (modal-based pre-processing adjustments)
+# ---------------------------------------------------------------------------
+
+@router.get("/adjustments")
+def list_adjustment_items_endpoint(
+    cutoff_start: date = None,
+    cutoff_end: date = None,
+    employee_id: int | None = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(UserRole.admin, UserRole.hr_manager)),
+):
+    items = list_adjustment_items(db, cutoff_start, cutoff_end, employee_id)
+    return success_response("Adjustment items fetched", [_item_to_dict(i) for i in items])
+
+
+@router.post("/adjustments")
+def create_adjustment_item_endpoint(
+    data: AdjustmentItemCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(UserRole.admin, UserRole.hr_manager)),
+):
+    item = create_adjustment_item(db, data)
+    create_audit_log(
+        db,
+        action="create_payroll_adjustment",
+        entity_type="payroll_adjustment_item",
+        entity_id=str(item.id),
+        actor=current_user,
+        details={"employee_id": item.employee_id, "type": item.type, "amount": float(item.amount)},
+    )
+    return success_response("Adjustment item created", _item_to_dict(item))
+
+
+@router.delete("/adjustments/{item_id}")
+def delete_adjustment_item_endpoint(
+    item_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(UserRole.admin, UserRole.hr_manager)),
+):
+    deleted = delete_adjustment_item(db, item_id)
+    if not deleted:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Adjustment item not found")
+    create_audit_log(
+        db,
+        action="delete_payroll_adjustment",
+        entity_type="payroll_adjustment_item",
+        entity_id=str(item_id),
+        actor=current_user,
+        details={},
+    )
+    return success_response("Adjustment item deleted", None)
 
 
 @router.post("/process")

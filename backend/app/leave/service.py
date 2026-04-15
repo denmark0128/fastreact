@@ -5,6 +5,7 @@ from datetime import date, datetime, timedelta
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.attendance.models import AttendanceRecord
 from app.employees.models import Employee
 from app.leave.models import AttendancePunch, LeaveRequest, LeaveStatus
 from app.leave.schemas import (
@@ -53,6 +54,26 @@ def _parse_schedule_range(schedule_value: str | None) -> tuple[int, int] | None:
 
 def _to_day_minutes(dt: datetime) -> int:
 	return (dt.hour * 60) + dt.minute
+
+
+def _to_day_minutes_from_hhmm(value: str | None) -> int | None:
+	if not value:
+		return None
+
+	parts = value.split(":")
+	if len(parts) != 2:
+		return None
+
+	hours, minutes = parts
+	if not (hours.isdigit() and minutes.isdigit()):
+		return None
+
+	hour_value = int(hours)
+	minute_value = int(minutes)
+	if not (0 <= hour_value <= 23 and 0 <= minute_value <= 59):
+		return None
+
+	return (hour_value * 60) + minute_value
 
 
 def ingest_biometric_punches(db: Session, punches: list[AttendancePunchIngestItem]) -> dict[str, int]:
@@ -150,9 +171,28 @@ def summarize_employee_attendance_for_cutoff(
 		.all()
 	)
 
+	attendance_records = (
+		db.query(AttendanceRecord)
+		.filter(
+			AttendanceRecord.employee_id == employee.id,
+			AttendanceRecord.date >= cutoff_start.isoformat(),
+			AttendanceRecord.date <= cutoff_end.isoformat(),
+		)
+		.order_by(AttendanceRecord.date.asc())
+		.all()
+	)
+
 	punches_by_day: dict[date, list[AttendancePunch]] = defaultdict(list)
 	for punch in punches:
 		punches_by_day[punch.punch_time.date()].append(punch)
+
+	records_by_day: dict[date, AttendanceRecord] = {}
+	for record in attendance_records:
+		try:
+			record_day = date.fromisoformat(record.date)
+		except ValueError:
+			continue
+		records_by_day[record_day] = record
 
 	weekly_schedule = employee.weekly_schedule or {}
 	scheduled_minutes = 0
@@ -166,13 +206,44 @@ def summarize_employee_attendance_for_cutoff(
 		day_key = current_day.strftime("%A").lower()
 		schedule_range = _parse_schedule_range(weekly_schedule.get(day_key))
 		day_punches = punches_by_day.get(current_day, [])
+		day_record = records_by_day.get(current_day)
 
 		if schedule_range:
 			schedule_start, schedule_end = schedule_range
 			day_scheduled_minutes = schedule_end - schedule_start
 			scheduled_minutes += day_scheduled_minutes
 
-			if day_punches:
+			if day_record:
+				am_in = _to_day_minutes_from_hhmm(day_record.am_in)
+				am_out = _to_day_minutes_from_hhmm(day_record.am_out)
+				pm_in = _to_day_minutes_from_hhmm(day_record.pm_in)
+				pm_out = _to_day_minutes_from_hhmm(day_record.pm_out)
+
+				day_actual_minutes = 0
+				if am_in is not None and am_out is not None and am_out > am_in:
+					day_actual_minutes += am_out - am_in
+				if pm_in is not None and pm_out is not None and pm_out > pm_in:
+					day_actual_minutes += pm_out - pm_in
+				actual_minutes += day_actual_minutes
+
+				first_in_candidates = [value for value in (am_in, pm_in) if value is not None]
+				last_out_candidates = [value for value in (pm_out, am_out) if value is not None]
+
+				if first_in_candidates and last_out_candidates:
+					first_in = min(first_in_candidates)
+					last_out = max(last_out_candidates)
+
+					raw_late = max(first_in - schedule_start, 0)
+					late_minutes += raw_late if raw_late > late_grace else 0
+
+					raw_undertime = max(schedule_end - last_out, 0)
+					if undertime_rounding > 0:
+						raw_undertime = (raw_undertime // undertime_rounding) * undertime_rounding
+					undertime_minutes += raw_undertime
+
+					raw_overtime = max(last_out - schedule_end, 0)
+					overtime_minutes += raw_overtime if raw_overtime >= min_overtime else 0
+			elif day_punches:
 				first_punch_minutes = _to_day_minutes(day_punches[0].punch_time)
 				last_punch_minutes = _to_day_minutes(day_punches[-1].punch_time)
 				if last_punch_minutes > first_punch_minutes:

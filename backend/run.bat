@@ -3,14 +3,14 @@ setlocal
 
 pushd "%~dp0"
 
-if not exist "\venv\Scripts\python" (
-	echo Virtual environment not found at \venv\Scripts\python
+if not exist "venv\Scripts\Activate.ps1" (
+	echo Virtual environment not found at venv\Scripts\Activate.ps1
 	echo Create it first with: python -m venv venv
 	popd
 	exit /b 1
 )
 
-call .\venv\Scripts\activate.bat
+call venv\Scripts\Activate.ps1
 
 if "%DATABASE_URL%"=="" (
 	set DATABASE_URL=sqlite:///./dev.sqlite3
